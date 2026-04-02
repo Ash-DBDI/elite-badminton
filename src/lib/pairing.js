@@ -1,17 +1,42 @@
 import { teamRating, balance } from './elo.js'
 
-export function makeGame(players, history = [], gameNumber = 1) {
+export function makeGame(players, history = [], gameNumber = 1, lastGame = null) {
   if (players.length < 4) return null
 
-  const sorted = [...players].sort((a, b) => {
+  // RULE 1: Players who sat out last game MUST play this game
+  const mustPlayIds = new Set(lastGame?.sitting_out || [])
+
+  const mustPlay = players.filter(p => mustPlayIds.has(p.id))
+  const others = players.filter(p => !mustPlayIds.has(p.id))
+
+  // Sort others by fewest games played (RULE 3), then fewest wins
+  others.sort((a, b) => {
     const gDiff = (a.session_games || 0) - (b.session_games || 0)
     if (gDiff !== 0) return gDiff
     return (a.session_wins || 0) - (b.session_wins || 0)
   })
 
-  const pool = sorted.slice(0, 4)
-  const sittingOut = sorted.slice(4).map(p => p.id)
+  let pool
+  if (mustPlay.length >= 4) {
+    // More mandatory players than spots — sort them by fewest games, take 4
+    mustPlay.sort((a, b) => {
+      const gDiff = (a.session_games || 0) - (b.session_games || 0)
+      if (gDiff !== 0) return gDiff
+      return (a.session_wins || 0) - (b.session_wins || 0)
+    })
+    pool = mustPlay.slice(0, 4)
+  } else {
+    // Fill remaining spots from others
+    const spotsNeeded = 4 - mustPlay.length
+    pool = [...mustPlay, ...others.slice(0, spotsNeeded)]
+  }
 
+  if (pool.length < 4) return null
+
+  const poolIds = new Set(pool.map(p => p.id))
+  const sittingOut = players.filter(p => !poolIds.has(p.id)).map(p => p.id)
+
+  // Find best balanced pairing of the 4 players
   const combos = [
     { a: [pool[0], pool[1]], b: [pool[2], pool[3]] },
     { a: [pool[0], pool[2]], b: [pool[1], pool[3]] },
@@ -59,7 +84,8 @@ export function buildSchedule(players, totalMinutes = 120, minsPerGame = 12) {
   const stats = players.map(p => ({ ...p, session_games: 0, session_wins: 0 }))
 
   for (let i = 0; i < count; i++) {
-    const g = makeGame(stats, games, i + 1)
+    const prevGame = games.length > 0 ? games[games.length - 1] : null
+    const g = makeGame(stats, games, i + 1, prevGame)
     if (!g) break
     games.push(g)
     ;[g.team_a_player1, g.team_a_player2, g.team_b_player1, g.team_b_player2]
@@ -86,8 +112,13 @@ export function reshuffleRemaining(players, completedGames, pendingCount, nextGa
     return { ...p, session_games: played, session_wins: wins }
   })
 
+  // Last completed game (highest game_number) provides sitting_out context
+  const sortedCompleted = [...completedGames].sort((a, b) => a.game_number - b.game_number)
+  const lastCompletedGame = sortedCompleted.length > 0 ? sortedCompleted[sortedCompleted.length - 1] : null
+
   for (let i = 0; i < pendingCount; i++) {
-    const g = makeGame(stats, [...completedGames, ...games], nextGameNumber + i)
+    const prevGame = games.length > 0 ? games[games.length - 1] : lastCompletedGame
+    const g = makeGame(stats, [...completedGames, ...games], nextGameNumber + i, prevGame)
     if (!g) break
     games.push(g)
     ;[g.team_a_player1, g.team_a_player2, g.team_b_player1, g.team_b_player2]
