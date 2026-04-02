@@ -56,8 +56,8 @@ export function SessionProvider({ children }) {
     return data
   }
 
-  const addPlayerToSession = async (sessionId, playerId) => {
-    await supabase.from('session_players').insert({ session_id: sessionId, player_id: playerId })
+  const addPlayerToSession = async (sessionId, playerId, status = 'here') => {
+    await supabase.from('session_players').insert({ session_id: sessionId, player_id: playerId, status })
     await fetchActiveSession()
   }
 
