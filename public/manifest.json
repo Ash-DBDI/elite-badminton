@@ -1,0 +1,8 @@
+{
+  "name": "Elite Badminton Social",
+  "short_name": "EBS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#141414",
+  "theme_color": "#c9a84c"
+}
