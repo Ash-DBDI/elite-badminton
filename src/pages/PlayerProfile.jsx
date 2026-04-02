@@ -43,6 +43,7 @@ export default function PlayerProfile() {
   if (loading || !player) return <div className="page-loading">Loading...</div>
 
   const tier = getTier(player.skill_rating)
+  const ranked = player.total_games >= 20
   const winRate = player.total_games > 0 ? Math.round((player.total_wins / player.total_games) * 100) : 0
   const diff = player.total_points_scored - player.total_points_conceded
   const getPlayer = (pid) => allPlayers.find(p => p.id === pid)
@@ -58,9 +59,13 @@ export default function PlayerProfile() {
           <Avatar initials={player.initials} color={player.color} size={64} />
           <div className="profile-info">
             <h2>{player.name}</h2>
-            <span className="profile-tier" style={{ color: tier.color }}>
-              {player.skill_rating} {tier.label}
-            </span>
+            {ranked ? (
+              <span className="profile-tier" style={{ color: tier.color }}>
+                {player.skill_rating} {tier.label}
+              </span>
+            ) : (
+              <span className="profile-tier" style={{ color: '#888' }}>Unranked</span>
+            )}
           </div>
           <WhatsAppButton onClick={() => sharePlayerStats(player)} label="Share" />
         </div>

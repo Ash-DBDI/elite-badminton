@@ -28,6 +28,7 @@ export default function Leaderboard() {
         <div className="leaderboard-list">
           {sorted.map((player, i) => {
             const tier = getTier(player.skill_rating)
+            const ranked = player.total_games >= 20
             const winRate = player.total_games > 0 ? Math.round((player.total_wins / player.total_games) * 100) : 0
             const medal = i === 0 ? '\u{1F451}' : i === 1 ? '\u{1F948}' : i === 2 ? '\u{1F949}' : `${i + 1}`
 
@@ -46,8 +47,14 @@ export default function Leaderboard() {
                   </span>
                 </div>
                 <div className="lb-rating">
-                  <span className="lb-rating-num">{player.skill_rating}</span>
-                  <span className="lb-tier" style={{ color: tier.color }}>{tier.label}</span>
+                  {ranked ? (
+                    <>
+                      <span className="lb-rating-num">{player.skill_rating}</span>
+                      <span className="lb-tier" style={{ color: tier.color }}>{tier.label}</span>
+                    </>
+                  ) : (
+                    <span className="lb-tier" style={{ color: '#888' }}>Unranked</span>
+                  )}
                 </div>
               </div>
             )

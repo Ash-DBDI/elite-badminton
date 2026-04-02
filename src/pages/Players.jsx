@@ -104,6 +104,7 @@ export default function Players() {
         <div className="player-grid">
           {players.map(player => {
             const tier = getTier(player.skill_rating)
+            const ranked = player.total_games >= 20
             return (
               <div key={player.id} className="player-card">
                 <div
@@ -114,9 +115,13 @@ export default function Players() {
                   <Avatar initials={player.initials} color={player.color} size={48} />
                   <div className="player-card-info">
                     <span className="player-card-name">{player.name}</span>
-                    <span className="player-card-rating" style={{ color: tier.color }}>
-                      {player.skill_rating} {tier.label}
-                    </span>
+                    {ranked ? (
+                      <span className="player-card-rating" style={{ color: tier.color }}>
+                        {player.skill_rating} {tier.label}
+                      </span>
+                    ) : (
+                      <span className="player-card-rating" style={{ color: '#888' }}>Unranked</span>
+                    )}
                     <span className="player-card-record">
                       {player.total_wins}W {player.total_losses}L
                     </span>
@@ -153,14 +158,19 @@ export default function Players() {
             <div className="player-grid">
               {inactivePlayers.map(player => {
                 const tier = getTier(player.skill_rating)
+                const ranked = player.total_games >= 20
                 return (
                   <div key={player.id} className="player-card" style={{ opacity: 0.5 }}>
                     <Avatar initials={player.initials} color={player.color} size={48} />
                     <div className="player-card-info" style={{ flex: 1 }}>
                       <span className="player-card-name">{player.name}</span>
-                      <span className="player-card-rating" style={{ color: tier.color }}>
-                        {player.skill_rating} {tier.label}
-                      </span>
+                      {ranked ? (
+                        <span className="player-card-rating" style={{ color: tier.color }}>
+                          {player.skill_rating} {tier.label}
+                        </span>
+                      ) : (
+                        <span className="player-card-rating" style={{ color: '#888' }}>Unranked</span>
+                      )}
                       <span className="player-card-record">
                         {player.total_wins}W {player.total_losses}L
                       </span>

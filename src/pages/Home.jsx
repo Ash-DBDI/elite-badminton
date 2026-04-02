@@ -20,9 +20,9 @@ export default function Home() {
         {activeSession ? (
           <button
             className="btn btn-primary btn-lg"
-            onClick={() => navigate(activeSession.status === 'setup' ? '/session' : '/live')}
+            onClick={() => navigate('/live')}
           >
-            {activeSession.status === 'setup' ? 'Continue Setup' : 'Join Live Session'}
+            Join Active Session
           </button>
         ) : (
           <button className="btn btn-primary btn-lg" onClick={() => navigate('/session')}>
@@ -37,6 +37,7 @@ export default function Home() {
           <div className="top-players">
             {topPlayers.map((player, i) => {
               const tier = getTier(player.skill_rating)
+              const ranked = player.total_games >= 20
               const medal = i === 0 ? '\u{1F451}' : i === 1 ? '\u{1F948}' : '\u{1F949}'
               return (
                 <div
@@ -48,9 +49,13 @@ export default function Home() {
                   <Avatar initials={player.initials} color={player.color} size={48} />
                   <div className="top-player-info">
                     <span className="top-player-name">{player.name}</span>
-                    <span className="top-player-rating" style={{ color: tier.color }}>
-                      {player.skill_rating} {tier.label}
-                    </span>
+                    {ranked ? (
+                      <span className="top-player-rating" style={{ color: tier.color }}>
+                        {player.skill_rating} {tier.label}
+                      </span>
+                    ) : (
+                      <span className="top-player-rating" style={{ color: '#888' }}>Unranked</span>
+                    )}
                   </div>
                 </div>
               )
