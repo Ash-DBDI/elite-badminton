@@ -6,6 +6,41 @@ import { buildSchedule, reshuffleRemaining } from '../lib/pairing'
 import Avatar from '../components/Avatar'
 import Header from '../components/Header'
 
+function InstallBanner() {
+  const [prompt, setPrompt] = useState(null)
+  const [show, setShow] = useState(false)
+  const [installed, setInstalled] = useState(false)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem('ebs_install_dismissed')
+    if (dismissed) return
+    if (isIOS) { setShow(true); return }
+    const handler = (e) => { e.preventDefault(); setPrompt(e); setShow(true) }
+    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', () => setInstalled(true))
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  if (!show || installed) return null
+
+  return (
+    <div style={{ margin: '12px 0 0', background: 'linear-gradient(135deg, #0d3d24, #1a6b42)', border: '1px solid var(--gold-border)', borderRadius: '14px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <span style={{ fontSize: '28px' }}>{'\u{1F4F2}'}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--gold)', marginBottom: '2px' }}>Add EBS to home screen</div>
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
+          {isIOS ? 'Tap Share \u2B06\uFE0F then "Add to Home Screen"' : 'One tap access, works like an app'}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        {!isIOS && <button onClick={async () => { if (prompt) { prompt.prompt(); const { outcome } = await prompt.userChoice; if (outcome === 'accepted') setShow(false) } }} style={{ padding: '8px 14px', borderRadius: '8px', background: 'var(--gold)', border: 'none', color: '#111', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>Install</button>}
+        <button onClick={() => { localStorage.setItem('ebs_install_dismissed', '1'); setShow(false) }} style={{ padding: '8px', borderRadius: '8px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '16px', cursor: 'pointer' }}>{'\u2715'}</button>
+      </div>
+    </div>
+  )
+}
+
 export default function ActiveSession() {
   const navigate = useNavigate()
   const { activeSession, loadActiveSession, players, isAdmin } = useApp()
@@ -54,6 +89,7 @@ export default function ActiveSession() {
   return (
     <div className="screen" style={{ padding: '24px 16px 90px' }}>
       <Header />
+      <InstallBanner />
 
       {!activeSession ? (
         <>

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { tier } from '../lib/elo'
 import Avatar from '../components/Avatar'
 import Header from '../components/Header'
+import { shareLeaderboard } from '../lib/whatsapp'
 
 const BADGE_DEFS = {
   HOT_HAND: { icon: '\u{1F525}', label: 'Hot Hand', desc: '3 wins in a row' },
@@ -195,6 +196,12 @@ export default function Stats() {
           )
         })}
       </div>
+
+      {ranked.length > 0 && (
+        <button onClick={() => shareLeaderboard({ players, period: tabLabels[tab] })} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--green-dim)', border: '1px solid var(--green-border)', color: 'var(--green2)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", marginBottom: '20px' }}>
+          {'\u{1F4F2}'} Share Leaderboard
+        </button>
+      )}
 
       {/* Badges */}
       <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '16px' }}>

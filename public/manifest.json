@@ -1,8 +1,20 @@
 {
-  "name": "EBS",
+  "name": "Elite Badminton Social",
   "short_name": "EBS",
+  "description": "Private badminton group session manager",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#141414",
-  "theme_color": "#c9a84c"
+  "orientation": "portrait",
+  "background_color": "#080808",
+  "theme_color": "#c9a84c",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["sports", "social"],
+  "shortcuts": [
+    { "name": "Active Session", "url": "/", "description": "View current session" },
+    { "name": "Schedule", "url": "/schedule", "description": "View game schedule" }
+  ]
 }

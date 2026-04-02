@@ -99,52 +99,73 @@ export default function Admin() {
     }
   }
 
+  const [showEndConfirm, setShowEndConfirm] = useState(false)
+  const [ending, setEnding] = useState(false)
+
   async function handleEndSession() {
     if (!activeSession) return
-    if (!confirm('End this session?')) return
+    setEnding(true)
+    try {
+      const allGames = activeSession.games || []
+      const completedGames = allGames.filter(g => g.status === 'completed')
+      const spList = activeSession.session_players || []
+      const newBadges = []
 
-    const games = activeSession.games?.filter(g => g.status === 'completed') || []
-    const spList = activeSession.session_players || []
+      // Calculate POTD
+      let bestScore = -999, potdId = null
+      spList.forEach(sp => {
+        const score = sp.games_won * 3 + (sp.points_scored - sp.points_conceded) * 0.1
+        if (score > bestScore && sp.games_played > 0) { bestScore = score; potdId = sp.player_id }
+      })
+      if (potdId) {
+        await supabase.from('badges').insert({ player_id: potdId, session_id: activeSession.id, badge_type: 'POTD' })
+        newBadges.push({ player_id: potdId, badge_type: 'POTD' })
+      }
 
-    // Calculate POTD
-    let bestScore = -999, potdId = null
-    spList.forEach(sp => {
-      const score = sp.games_won * 3 + (sp.points_scored - sp.points_conceded) * 0.1
-      if (score > bestScore && sp.games_played > 0) { bestScore = score; potdId = sp.player_id }
-    })
-
-    if (potdId) {
-      await supabase.from('badges').insert({ player_id: potdId, session_id: activeSession.id, badge_type: 'POTD' })
-    }
-
-    // Iron Man badge
-    const totalGames = games.length
-    if (totalGames >= 3) {
-      spList.forEach(async sp => {
-        if (sp.games_played >= totalGames) {
-          await supabase.from('badges').insert({ player_id: sp.player_id, session_id: activeSession.id, badge_type: 'IRON_MAN' })
+      // Iron Man
+      const totalGames = completedGames.length
+      if (totalGames >= 3) {
+        for (const sp of spList) {
+          if (sp.games_played >= totalGames) {
+            await supabase.from('badges').insert({ player_id: sp.player_id, session_id: activeSession.id, badge_type: 'IRON_MAN' })
+            newBadges.push({ player_id: sp.player_id, badge_type: 'IRON_MAN' })
+          }
         }
-      })
-    }
+      }
 
-    // The Wall badge
-    if (spList.length > 0) {
-      const minConceded = Math.min(...spList.filter(s => s.games_played > 0).map(s => s.points_conceded))
-      spList.filter(s => s.points_conceded === minConceded && s.games_played > 0).forEach(async sp => {
-        await supabase.from('badges').insert({ player_id: sp.player_id, session_id: activeSession.id, badge_type: 'THE_WALL' })
-      })
-    }
+      // The Wall
+      const activeSp = spList.filter(s => s.games_played > 0)
+      if (activeSp.length > 0) {
+        const minConceded = Math.min(...activeSp.map(s => s.points_conceded))
+        for (const sp of activeSp.filter(s => s.points_conceded === minConceded)) {
+          await supabase.from('badges').insert({ player_id: sp.player_id, session_id: activeSession.id, badge_type: 'THE_WALL' })
+          newBadges.push({ player_id: sp.player_id, badge_type: 'THE_WALL' })
+        }
+      }
 
-    // Delete remaining pending/active games
-    await supabase.from('games').delete().eq('session_id', activeSession.id).in('status', ['pending', 'active'])
+      // Delete pending/active games
+      await supabase.from('games').delete().eq('session_id', activeSession.id).in('status', ['pending', 'active'])
 
-    await supabase.from('sessions').update({
-      status: 'completed', player_of_day: potdId,
-      completed_at: new Date().toISOString()
-    }).eq('id', activeSession.id)
+      // Complete session
+      await supabase.from('sessions').update({
+        status: 'completed', player_of_day: potdId, completed_at: new Date().toISOString()
+      }).eq('id', activeSession.id)
 
-    await loadActiveSession()
-    await loadPlayers()
+      const potdPlayer = potdId ? players.find(p => p.id === potdId) : null
+      const sessionDate = new Date(activeSession.session_date + 'T00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+
+      await loadActiveSession()
+      await loadPlayers()
+      setShowEndConfirm(false)
+
+      navigate('/session-end', { state: {
+        sessionId: activeSession.id, potdPlayer, newBadges,
+        sessionStats: spList, games: completedGames, sessionDate
+      }})
+    } catch (err) {
+      console.error(err)
+      alert('Error ending session')
+    } finally { setEnding(false) }
   }
 
   async function handleDeleteUpcoming(id) {
@@ -316,15 +337,25 @@ export default function Admin() {
             <div style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '14px' }}>
               {activeSession.title} {'\u00B7'} {new Date(activeSession.session_date + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </div>
-            <button onClick={handleEndSession} style={{
-              width: '100%', padding: '14px', borderRadius: '12px',
-              background: 'var(--red-dim)', border: '1px solid var(--red)',
-              color: 'var(--red)', fontWeight: 600, fontSize: '14px',
-              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-              marginBottom: '10px'
-            }}>
-              End Session
-            </button>
+            {!showEndConfirm ? (
+              <button onClick={() => setShowEndConfirm(true)} style={{
+                width: '100%', padding: '14px', borderRadius: '12px',
+                background: 'var(--red-dim)', border: '1px solid var(--red)',
+                color: 'var(--red)', fontWeight: 600, fontSize: '14px',
+                cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", marginBottom: '10px'
+              }}>End Session</button>
+            ) : (
+              <div style={{ background: 'var(--surface2)', borderRadius: '12px', padding: '16px', marginBottom: '10px', textAlign: 'center' }}>
+                <div style={{ fontSize: '15px', fontWeight: 600, marginBottom: '4px' }}>End Session?</div>
+                <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '14px' }}>
+                  {(activeSession.games || []).filter(g => g.status === 'completed').length} games played {'\u00B7'} {(activeSession.session_players || []).length} players
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={handleEndSession} disabled={ending} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: ending ? 'var(--surface2)' : 'var(--gold)', border: 'none', color: '#111', fontWeight: 700, fontSize: '13px', cursor: ending ? 'wait' : 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{ending ? 'Ending...' : 'End & Reveal'}</button>
+                  <button onClick={() => setShowEndConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Cancel</button>
+                </div>
+              </div>
+            )}
 
             {/* Delete entire session */}
             {!showDeleteSession ? (

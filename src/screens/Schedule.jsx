@@ -5,6 +5,7 @@ import { expectedScore, updatedRating, teamRating } from '../lib/elo'
 import { reshuffleRemaining } from '../lib/pairing'
 import Avatar from '../components/Avatar'
 import PinGate from '../components/PinGate'
+import { shareGameResult } from '../lib/whatsapp'
 import Header from '../components/Header'
 
 const pmBtn = {
@@ -239,10 +240,11 @@ export default function Schedule() {
         {game.sitting_out?.length > 0 && <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '10px', textAlign: 'center' }}>Sitting out: {game.sitting_out.map(id => P(id).name).join(', ')}</div>}
 
         {/* Admin: completed game buttons */}
-        {isDone && isAdmin && !isEditing && (
+        {isDone && !isEditing && (
           <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
-            <button onClick={() => { setEditingGame(game.id); setEditA(String(game.team_a_score)); setEditB(String(game.team_b_score)); setEditError('') }} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{270F}\u{FE0F}'} Edit Score</button>
-            <button onClick={() => setConfirmDelete(game)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--red-dim)', border: '1px solid var(--red)', color: 'var(--red)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{1F5D1}\u{FE0F}'} Delete</button>
+            <button onClick={() => shareGameResult({ gameNumber: game.game_number, teamA: [P(game.team_a_player1).name, P(game.team_a_player2).name], teamB: [P(game.team_b_player1).name, P(game.team_b_player2).name], scoreA: game.team_a_score, scoreB: game.team_b_score, sessionDate: activeSession?.session_date || '' })} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--green-dim)', border: '1px solid var(--green-border)', color: 'var(--green)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{1F4F2}'} Share</button>
+            {isAdmin && <button onClick={() => { setEditingGame(game.id); setEditA(String(game.team_a_score)); setEditB(String(game.team_b_score)); setEditError('') }} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{270F}\u{FE0F}'} Edit</button>}
+            {isAdmin && <button onClick={() => setConfirmDelete(game)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--red-dim)', border: '1px solid var(--red)', color: 'var(--red)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{1F5D1}\u{FE0F}'} Delete</button>}
           </div>
         )}
         {isDone && isEditing && (

@@ -8,6 +8,7 @@ import Admin from './screens/Admin'
 import Stats from './screens/Stats'
 import History from './screens/History'
 import PlayerDetail from './screens/PlayerDetail'
+import SessionEnd from './screens/SessionEnd'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/admin" element={<><Admin /><Nav /></>} />
           <Route path="/stats" element={<><Stats /><Nav /></>} />
           <Route path="/history" element={<><History /><Nav /></>} />
+          <Route path="/session-end" element={<><SessionEnd /><Nav /></>} />
         </Routes>
       </BrowserRouter>
     </AppProvider>

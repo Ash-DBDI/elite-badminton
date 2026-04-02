@@ -120,3 +120,23 @@ input[type=text].score-input {
 input[type=text].score-input:focus {
   border-color: var(--gold);
 }
+
+@keyframes crownFloat {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+nav {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+}
