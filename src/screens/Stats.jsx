@@ -24,12 +24,9 @@ export default function Stats() {
   const [badges, setBadges] = useState([])
   const [allBadges, setAllBadges] = useState([])
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  useEffect(() => { loadData() }, [])
 
   async function loadData() {
-    // Load most recent completed session
     const { data: sess } = await supabase
       .from('sessions')
       .select('*, session_players(*, players(*)), games(*)')
@@ -39,7 +36,6 @@ export default function Stats() {
       .maybeSingle()
     setTodaySession(sess)
 
-    // Load all badges
     const { data: b } = await supabase.from('badges').select('*, players(name, initials)').order('earned_at', { ascending: false })
     setAllBadges(b || [])
     if (sess) {
@@ -48,20 +44,21 @@ export default function Stats() {
     }
   }
 
-  // Sort players for leaderboard
-  const sorted = [...players]
+  // FIX 3: Filter out 0-game players, FIX 1: sort by total_wins desc, then win% as tiebreaker
+  const ranked = [...players]
+    .filter(p => p.total_games > 0)
     .sort((a, b) => {
-      const wpA = a.total_games >= 10 ? a.total_wins / a.total_games : -1
-      const wpB = b.total_games >= 10 ? b.total_wins / b.total_games : -1
-      if (wpA !== wpB) return wpB - wpA
-      return b.total_wins - a.total_wins
+      if (b.total_wins !== a.total_wins) return b.total_wins - a.total_wins
+      const wpA = a.total_games > 0 ? a.total_wins / a.total_games : 0
+      const wpB = b.total_games > 0 ? b.total_wins / b.total_games : 0
+      return wpB - wpA
     })
 
+  // FIX 1: POTD comes from most recent completed session's player_of_day, not leaderboard
   const potd = todaySession?.player_of_day
     ? players.find(p => p.id === todaySession.player_of_day)
     : null
-
-  const potdSp = todaySession?.session_players?.find(sp => sp.player_id === todaySession.player_of_day)
+  const potdSp = todaySession?.session_players?.find(sp => sp.player_id === todaySession?.player_of_day)
 
   return (
     <div className="screen" style={{ padding: '20px 16px 90px' }}>
@@ -70,10 +67,7 @@ export default function Stats() {
       </div>
 
       {/* Tab toggle */}
-      <div style={{
-        display: 'flex', gap: '4px', background: 'var(--surface2)',
-        borderRadius: '10px', padding: '3px', marginBottom: '20px'
-      }}>
+      <div style={{ display: 'flex', gap: '4px', background: 'var(--surface2)', borderRadius: '10px', padding: '3px', marginBottom: '20px' }}>
         {['today', 'month', 'quarter'].map(t => (
           <button key={t} onClick={() => setTab(t)} style={{
             flex: 1, padding: '8px', borderRadius: '8px',
@@ -86,7 +80,7 @@ export default function Stats() {
         ))}
       </div>
 
-      {/* POTD section (today tab) */}
+      {/* POTD section */}
       {tab === 'today' && (
         <div style={{
           background: 'linear-gradient(135deg, var(--gold-dim), var(--surface))',
@@ -103,7 +97,7 @@ export default function Stats() {
               <div style={{ fontSize: '20px', fontWeight: 600, marginBottom: '4px' }}>{potd.name}</div>
               {potdSp && (
                 <div style={{ fontSize: '13px', color: 'var(--muted)' }}>
-                  {potdSp.games_won}W {potdSp.games_played - potdSp.games_won}L {'\u00B7'} +{potdSp.points_scored - potdSp.points_conceded} pts
+                  {potdSp.games_won}W {potdSp.games_played - potdSp.games_won}L {'\u00B7'} {potdSp.points_scored - potdSp.points_conceded > 0 ? '+' : ''}{potdSp.points_scored - potdSp.points_conceded} pts
                 </div>
               )}
               {badges.length > 0 && (
@@ -119,7 +113,7 @@ export default function Stats() {
           ) : (
             <>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '18px', fontWeight: 300, marginBottom: '4px' }}>
-                No session today
+                No completed session yet
               </div>
               <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Complete a session to crown POTD</div>
             </>
@@ -128,50 +122,77 @@ export default function Stats() {
       )}
 
       {/* Leaderboard */}
-      <div style={{
-        background: 'var(--surface)', borderRadius: '16px',
-        border: '1px solid var(--border)', padding: '16px', marginBottom: '20px'
-      }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '16px', marginBottom: '20px' }}>
         <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '14px' }}>Leaderboard</div>
 
-        {/* Top 3 podium */}
-        {sorted.length >= 3 && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '8px', marginBottom: '20px' }}>
-            {[1, 0, 2].map(rank => {
-              const p = sorted[rank]
-              if (!p) return null
-              const heights = [80, 60, 50]
-              const medals = ['\u{1F451}', '\u{1F948}', '\u{1F949}']
-              const colors = ['var(--gold)', '#c0c0c0', '#cd7f32']
-              return (
-                <div key={rank} style={{ textAlign: 'center', flex: 1 }}>
-                  <Avatar initials={p.initials} size={rank === 0 ? 40 : 32} index={players.indexOf(p)} style={{ margin: '0 auto 6px' }} />
-                  <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{p.name}</div>
-                  <div style={{
-                    height: heights[rank], borderRadius: '8px 8px 0 0',
-                    background: `${colors[rank]}22`, borderTop: `3px solid ${colors[rank]}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '20px'
-                  }}>
-                    {medals[rank]}
-                  </div>
-                </div>
-              )
-            })}
+        {ranked.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)', fontSize: '13px' }}>
+            No games played yet
           </div>
         )}
 
-        {/* Full list */}
-        {sorted.map((p, i) => {
+        {/* FIX 1 & 5: Podium — #2 left, #1 center (tallest), #3 right with correct medals */}
+        {ranked.length >= 3 && (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '8px', marginBottom: '20px' }}>
+            {/* #2 — left, medium */}
+            {(() => {
+              const p = ranked[1]
+              return (
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <Avatar initials={p.initials} size={32} index={players.indexOf(p)} style={{ margin: '0 auto 6px' }} />
+                  <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{p.name}</div>
+                  <div style={{
+                    height: 60, borderRadius: '8px 8px 0 0',
+                    background: 'rgba(192,192,192,0.13)', borderTop: '3px solid #c0c0c0',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+                  }}>{'\u{1F948}'}</div>
+                </div>
+              )
+            })()}
+            {/* #1 — center, tallest */}
+            {(() => {
+              const p = ranked[0]
+              return (
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <Avatar initials={p.initials} size={40} index={players.indexOf(p)} style={{ margin: '0 auto 6px' }} />
+                  <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{p.name}</div>
+                  <div style={{
+                    height: 80, borderRadius: '8px 8px 0 0',
+                    background: 'var(--gold-dim)', borderTop: '3px solid var(--gold)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+                  }}>{'\u{1F451}'}</div>
+                </div>
+              )
+            })()}
+            {/* #3 — right, shortest */}
+            {(() => {
+              const p = ranked[2]
+              return (
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <Avatar initials={p.initials} size={32} index={players.indexOf(p)} style={{ margin: '0 auto 6px' }} />
+                  <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{p.name}</div>
+                  <div style={{
+                    height: 50, borderRadius: '8px 8px 0 0',
+                    background: 'rgba(205,127,50,0.13)', borderTop: '3px solid #cd7f32',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+                  }}>{'\u{1F949}'}</div>
+                </div>
+              )
+            })()}
+          </div>
+        )}
+
+        {/* Full ranked list — FIX 2: win% for anyone with games > 0, FIX 4: correct total_games */}
+        {ranked.map((p, i) => {
           const t = tier(p.skill_rating, p.total_games)
-          const wp = p.total_games >= 10 ? Math.round((p.total_wins / p.total_games) * 100) + '%' : '\u2014'
+          const wp = p.total_games > 0 ? Math.round((p.total_wins / p.total_games) * 100) + '%' : '\u2014'
           return (
             <div key={p.id} style={{
               display: 'flex', alignItems: 'center', gap: '10px',
               padding: '8px 0', borderTop: i === 0 ? 'none' : '1px solid var(--border)'
             }}>
               <span style={{ width: '20px', fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textAlign: 'center' }}>{i + 1}</span>
-              <Avatar initials={p.initials} size={30} index={i} />
+              <Avatar initials={p.initials} size={30} index={players.indexOf(p)} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '13px', fontWeight: 500 }}>{p.name}</div>
                 <div style={{ fontSize: '10px', color: t.color, fontWeight: 600 }}>{t.label}</div>
@@ -187,10 +208,7 @@ export default function Stats() {
       </div>
 
       {/* Badges grid */}
-      <div style={{
-        background: 'var(--surface)', borderRadius: '16px',
-        border: '1px solid var(--border)', padding: '16px'
-      }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '16px' }}>
         <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '14px' }}>Badges</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
           {Object.entries(BADGE_DEFS).map(([key, def]) => {
