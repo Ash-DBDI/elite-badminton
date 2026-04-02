@@ -8,10 +8,11 @@ import PinGate from '../components/PinGate'
 
 export default function Schedule() {
   const { activeSession, loadActiveSession, players, loadPlayers } = useApp()
-  const [scoreA, setScoreA] = useState('')
-  const [scoreB, setScoreB] = useState('')
+  const [scoreA, setScoreA] = useState(0)
+  const [scoreB, setScoreB] = useState(0)
   const [showCompleted, setShowCompleted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [scoreError, setScoreError] = useState('')
 
   useEffect(() => {
     loadActiveSession()
@@ -53,10 +54,13 @@ export default function Schedule() {
 
   async function handleSubmitScore() {
     if (!currentGame || submitting) return
-    const a = parseInt(scoreA), b = parseInt(scoreB)
-    if (isNaN(a) || isNaN(b) || a < 0 || b < 0) return alert('Enter valid scores')
-    if (a === b) return alert('No ties allowed')
-    if (a !== 21 && b !== 21) return alert('Winner must have 21 points')
+    setScoreError('')
+    const a = scoreA, b = scoreB
+    if (a === b) { setScoreError('Scores cannot be tied'); return }
+    const winner = Math.max(a, b)
+    const loser = Math.min(a, b)
+    if (winner < 21) { setScoreError('Winner must have at least 21 points'); return }
+    if (loser >= winner) { setScoreError('Loser must have fewer points than winner'); return }
 
     setSubmitting(true)
     try {
@@ -177,13 +181,14 @@ export default function Schedule() {
         }
       }
 
-      setScoreA('')
-      setScoreB('')
+      setScoreA(0)
+      setScoreB(0)
+      setScoreError('')
       await loadActiveSession()
       await loadPlayers()
     } catch (err) {
       console.error(err)
-      alert('Error submitting score')
+      setScoreError('Error submitting score. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -299,30 +304,81 @@ export default function Schedule() {
         {/* Score input for active game */}
         {isActive && isCurrent && (
           <div style={{ marginTop: '16px' }}>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', marginBottom: '12px' }}>
-              <input type="number" value={scoreA} onChange={e => setScoreA(e.target.value)}
-                placeholder="0" min="0" max="30"
-                style={{
-                  width: '70px', padding: '14px', textAlign: 'center',
-                  fontSize: '24px', fontWeight: 800, borderRadius: '12px',
-                  border: '2px solid var(--border)', background: 'var(--surface2)',
-                  color: 'var(--text)', outline: 'none', fontFamily: "'DM Sans', sans-serif"
-                }} />
-              <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--muted)' }}>{'\u2013'}</span>
-              <input type="number" value={scoreB} onChange={e => setScoreB(e.target.value)}
-                placeholder="0" min="0" max="30"
-                style={{
-                  width: '70px', padding: '14px', textAlign: 'center',
-                  fontSize: '24px', fontWeight: 800, borderRadius: '12px',
-                  border: '2px solid var(--border)', background: 'var(--surface2)',
-                  color: 'var(--text)', outline: 'none', fontFamily: "'DM Sans', sans-serif"
-                }} />
+            {/* Team A score */}
+            <div style={{ textAlign: 'center', marginBottom: '6px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                {P(game.team_a_player1).name} & {P(game.team_a_player2).name}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                <button onClick={() => setScoreA(Math.max(0, scoreA - 1))} style={{
+                  width: '56px', height: '56px', borderRadius: '14px',
+                  background: 'var(--surface2)', border: '1px solid var(--border)',
+                  color: 'var(--text)', fontSize: '24px', fontWeight: 700,
+                  cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>{'\uFF0D'}</button>
+                <div style={{
+                  width: '80px', fontSize: '48px', fontWeight: 800,
+                  color: 'var(--text)', textAlign: 'center',
+                  fontFamily: "'DM Sans', sans-serif", lineHeight: 1
+                }}>{scoreA}</div>
+                <button onClick={() => setScoreA(Math.min(30, scoreA + 1))} style={{
+                  width: '56px', height: '56px', borderRadius: '14px',
+                  background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
+                  color: 'var(--gold)', fontSize: '24px', fontWeight: 700,
+                  cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>{'\uFF0B'}</button>
+              </div>
             </div>
+
+            <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: 800, color: 'var(--muted)', margin: '10px 0' }}>VS</div>
+
+            {/* Team B score */}
+            <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                {P(game.team_b_player1).name} & {P(game.team_b_player2).name}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                <button onClick={() => setScoreB(Math.max(0, scoreB - 1))} style={{
+                  width: '56px', height: '56px', borderRadius: '14px',
+                  background: 'var(--surface2)', border: '1px solid var(--border)',
+                  color: 'var(--text)', fontSize: '24px', fontWeight: 700,
+                  cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>{'\uFF0D'}</button>
+                <div style={{
+                  width: '80px', fontSize: '48px', fontWeight: 800,
+                  color: 'var(--text)', textAlign: 'center',
+                  fontFamily: "'DM Sans', sans-serif", lineHeight: 1
+                }}>{scoreB}</div>
+                <button onClick={() => setScoreB(Math.min(30, scoreB + 1))} style={{
+                  width: '56px', height: '56px', borderRadius: '14px',
+                  background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
+                  color: 'var(--gold)', fontSize: '24px', fontWeight: 700,
+                  cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>{'\uFF0B'}</button>
+              </div>
+            </div>
+
+            {/* Error message */}
+            {scoreError && (
+              <div style={{
+                background: 'var(--red-dim)', color: 'var(--red)',
+                padding: '10px 14px', borderRadius: '10px',
+                fontSize: '13px', fontWeight: 500, textAlign: 'center',
+                marginBottom: '12px'
+              }}>{scoreError}</div>
+            )}
+
+            {/* Submit button */}
             <button onClick={handleSubmitScore} disabled={submitting} style={{
-              width: '100%', padding: '14px', borderRadius: '12px',
+              width: '100%', padding: '18px', minHeight: '56px', borderRadius: '14px',
               background: submitting ? 'var(--surface2)' : 'var(--gold)',
-              border: 'none', color: '#111', fontWeight: 700, fontSize: '14px',
-              cursor: submitting ? 'wait' : 'pointer', fontFamily: "'DM Sans', sans-serif"
+              border: 'none', color: '#111', fontWeight: 800, fontSize: '16px',
+              cursor: submitting ? 'wait' : 'pointer', fontFamily: "'DM Sans', sans-serif",
+              letterSpacing: '0.02em'
             }}>
               {submitting ? 'Submitting...' : 'Submit Score'}
             </button>
