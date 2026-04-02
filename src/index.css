@@ -85,3 +85,23 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+input[type=text].score-input {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 700;
+  width: 88px;
+  height: 64px;
+  outline: none;
+  cursor: text;
+}
+input[type=text].score-input:focus {
+  border-color: var(--gold);
+}
