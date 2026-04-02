@@ -89,7 +89,7 @@ export default function Stats() {
           {potd ? (
             <>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Player of the Day</div>
-              <Avatar initials={potd.initials} size={56} index={players.indexOf(potd)} style={{ margin: '0 auto 10px' }} />
+              <Avatar initials={potd.initials} size={56} index={players.indexOf(potd)} avatarId={potd.avatar_id} style={{ margin: '0 auto 10px' }} />
               <div style={{ fontSize: '20px', fontWeight: 600, marginBottom: '4px' }}>{potd.name}</div>
               {potdSp && (
                 <div style={{ fontSize: '13px', color: 'var(--muted)' }}>
@@ -126,7 +126,7 @@ export default function Stats() {
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '8px', marginBottom: '20px' }}>
             {/* #2 left */}
             <div style={{ textAlign: 'center', flex: 1 }}>
-              <Avatar initials={ranked[1].initials} size={32} index={players.indexOf(ranked[1])} style={{ margin: '0 auto 6px' }} />
+              <Avatar initials={ranked[1].initials} size={32} index={players.indexOf(ranked[1])} avatarId={ranked[1].avatar_id} style={{ margin: '0 auto 6px' }} />
               <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{ranked[1].name}</div>
               <div style={{ height: 70, borderRadius: '8px 8px 0 0', background: 'rgba(192,192,192,0.13)', borderTop: '3px solid #c0c0c0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ fontSize: '20px' }}>{'\u{1F948}'}</span>
@@ -135,7 +135,7 @@ export default function Stats() {
             </div>
             {/* #1 center */}
             <div style={{ textAlign: 'center', flex: 1 }}>
-              <Avatar initials={ranked[0].initials} size={40} index={players.indexOf(ranked[0])} style={{ margin: '0 auto 6px' }} />
+              <Avatar initials={ranked[0].initials} size={40} index={players.indexOf(ranked[0])} avatarId={ranked[0].avatar_id} style={{ margin: '0 auto 6px' }} />
               <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{ranked[0].name}</div>
               <div style={{ height: 100, borderRadius: '8px 8px 0 0', background: 'var(--gold-dim)', borderTop: '3px solid var(--gold)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ fontSize: '20px' }}>{'\u{1F451}'}</span>
@@ -144,7 +144,7 @@ export default function Stats() {
             </div>
             {/* #3 right */}
             <div style={{ textAlign: 'center', flex: 1 }}>
-              <Avatar initials={ranked[2].initials} size={32} index={players.indexOf(ranked[2])} style={{ margin: '0 auto 6px' }} />
+              <Avatar initials={ranked[2].initials} size={32} index={players.indexOf(ranked[2])} avatarId={ranked[2].avatar_id} style={{ margin: '0 auto 6px' }} />
               <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{ranked[2].name}</div>
               <div style={{ height: 50, borderRadius: '8px 8px 0 0', background: 'rgba(205,127,50,0.13)', borderTop: '3px solid #cd7f32', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ fontSize: '20px' }}>{'\u{1F949}'}</span>
@@ -161,7 +161,7 @@ export default function Stats() {
           return (
             <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderTop: i === 0 ? 'none' : '1px solid var(--border)' }}>
               <span style={{ width: '20px', fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textAlign: 'center' }}>{i + 1}</span>
-              <Avatar initials={p.initials} size={30} index={players.indexOf(p)} />
+              <Avatar initials={p.initials} size={30} index={players.indexOf(p)} avatarId={p.avatar_id} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '13px', fontWeight: 500 }}>{p.name}</div>
                 <div style={{ fontSize: '10px', color: t.color, fontWeight: 600 }}>{t.label}</div>

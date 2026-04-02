@@ -161,7 +161,7 @@ export default function History() {
                         background: 'var(--surface2)', padding: '6px 10px', borderRadius: '8px',
                         fontSize: '12px'
                       }}>
-                        <Avatar initials={sp.players?.initials || '??'} size={22} index={i} />
+                        <Avatar initials={sp.players?.initials || '??'} size={22} index={i} avatarId={sp.players?.avatar_id} />
                         <span style={{ fontWeight: 500 }}>{sp.players?.name}</span>
                         <span style={{ color: 'var(--muted)' }}>{sp.games_won}W {sp.games_played - sp.games_won}L</span>
                       </div>

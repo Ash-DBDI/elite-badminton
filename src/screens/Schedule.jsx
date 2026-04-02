@@ -223,7 +223,7 @@ export default function Schedule() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ flex: 1, textAlign: 'center' }}>
-            {[game.team_a_player1, game.team_a_player2].map(id => { const p = P(id); return <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', justifyContent: 'center' }}><Avatar initials={p.initials} size={isCurrent ? 28 : 22} index={p._i} /><span style={{ fontSize: isCurrent ? '13px' : '11px', fontWeight: 500 }}>{p.name}</span></div> })}
+            {[game.team_a_player1, game.team_a_player2].map(id => { const p = P(id); return <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', justifyContent: 'center' }}><Avatar initials={p.initials} size={isCurrent ? 28 : 22} index={p._i} avatarId={p.avatar_id} /><span style={{ fontSize: isCurrent ? '13px' : '11px', fontWeight: 500 }}>{p.name}</span></div> })}
             {isDone && !isEditing && <div style={{ fontSize: '28px', fontWeight: 800, marginTop: '6px', color: game.team_a_score > game.team_b_score ? 'var(--gold)' : 'var(--muted)' }}>{game.team_a_score}</div>}
           </div>
           <div style={{ textAlign: 'center', minWidth: '60px' }}>
@@ -231,7 +231,7 @@ export default function Schedule() {
             <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)', background: 'var(--green-dim)', padding: '2px 8px', borderRadius: '8px' }}>{'\u{26A1}'} {game.balance_score}%</div>
           </div>
           <div style={{ flex: 1, textAlign: 'center' }}>
-            {[game.team_b_player1, game.team_b_player2].map(id => { const p = P(id); return <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', justifyContent: 'center' }}><Avatar initials={p.initials} size={isCurrent ? 28 : 22} index={p._i} /><span style={{ fontSize: isCurrent ? '13px' : '11px', fontWeight: 500 }}>{p.name}</span></div> })}
+            {[game.team_b_player1, game.team_b_player2].map(id => { const p = P(id); return <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', justifyContent: 'center' }}><Avatar initials={p.initials} size={isCurrent ? 28 : 22} index={p._i} avatarId={p.avatar_id} /><span style={{ fontSize: isCurrent ? '13px' : '11px', fontWeight: 500 }}>{p.name}</span></div> })}
             {isDone && !isEditing && <div style={{ fontSize: '28px', fontWeight: 800, marginTop: '6px', color: game.team_b_score > game.team_a_score ? 'var(--gold)' : 'var(--muted)' }}>{game.team_b_score}</div>}
           </div>
         </div>

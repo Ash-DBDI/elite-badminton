@@ -179,7 +179,7 @@ export default function ActiveSession() {
                     transition: 'background 0.2s',
                     cursor: 'pointer'
                   }} onClick={() => handleCheckIn(s.id, s.checked_in)}>
-                    <Avatar initials={p.initials} size={32} index={i} />
+                    <Avatar initials={p.initials} size={32} index={i} avatarId={p.avatar_id} />
                     <div style={{ flex: 1, fontWeight: 500, fontSize: '14px' }}>{p.name}</div>
                     <div style={{
                       width: '32px', height: '32px', borderRadius: '50%',

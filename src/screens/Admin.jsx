@@ -280,7 +280,7 @@ export default function Admin() {
                 }}>
                   {selectedPlayers[p.id] ? '\u{2713}' : ''}
                 </div>
-                <Avatar initials={p.initials} size={28} index={i} />
+                <Avatar initials={p.initials} size={28} index={i} avatarId={p.avatar_id} />
                 <span style={{ fontSize: '13px', fontWeight: 500 }}>{p.name}</span>
               </div>
             ))}

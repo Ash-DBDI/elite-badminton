@@ -1,3 +1,5 @@
+import { AVATARS } from './avatars/index.jsx'
+
 const COLORS = [
   { bg: '#2a2010', fg: '#c9a84c' },
   { bg: '#0e2830', fg: '#4ab9d4' },
@@ -9,7 +11,24 @@ const COLORS = [
   { bg: '#0e2826', fg: '#4bd4c4' },
 ]
 
-export default function Avatar({ initials, size = 36, index = 0, style = {} }) {
+export default function Avatar({ initials, size = 36, index = 0, avatarId, style = {} }) {
+  // If player has an avatar_id, render the SVG
+  if (avatarId && avatarId > 0) {
+    const av = AVATARS.find(a => a.id === avatarId)
+    if (av) {
+      const Comp = av.Component
+      return (
+        <div style={{
+          width: size, height: size, borderRadius: '50%',
+          overflow: 'hidden', flexShrink: 0, ...style
+        }}>
+          <Comp />
+        </div>
+      )
+    }
+  }
+
+  // Fallback to initials
   const c = COLORS[Math.abs(index) % COLORS.length]
   return (
     <div style={{
