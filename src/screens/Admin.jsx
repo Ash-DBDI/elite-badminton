@@ -25,6 +25,8 @@ export default function Admin() {
   const [notes, setNotes] = useState('')
   const [upcoming, setUpcoming] = useState([])
   const [creating, setCreating] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [showDeleteSession, setShowDeleteSession] = useState(false)
 
   useEffect(() => {
     const sel = {}
@@ -316,10 +318,67 @@ export default function Admin() {
               width: '100%', padding: '14px', borderRadius: '12px',
               background: 'var(--red-dim)', border: '1px solid var(--red)',
               color: 'var(--red)', fontWeight: 600, fontSize: '14px',
-              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
+              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+              marginBottom: '10px'
             }}>
               End Session
             </button>
+
+            {/* Delete entire session */}
+            {!showDeleteSession ? (
+              <button onClick={() => setShowDeleteSession(true)} style={{
+                width: '100%', padding: '10px', borderRadius: '10px',
+                background: 'transparent', border: 'none',
+                color: 'var(--red)', fontWeight: 500, fontSize: '12px',
+                cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                opacity: 0.6
+              }}>
+                {'\u{1F5D1}\u{FE0F}'} Delete Entire Session
+              </button>
+            ) : (
+              <div style={{ marginTop: '8px', padding: '14px', background: 'var(--red-dim)', borderRadius: '12px', border: '1px solid var(--red)' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--red)', marginBottom: '8px' }}>
+                  This will permanently delete this session, all games, and all session data.
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '10px' }}>
+                  Type DELETE to confirm:
+                </div>
+                <input value={deleteConfirmText} onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type DELETE" style={{
+                    width: '100%', padding: '10px', borderRadius: '8px',
+                    border: '1px solid var(--red)', background: 'var(--surface2)',
+                    color: 'var(--text)', fontSize: '14px', outline: 'none',
+                    fontFamily: "'DM Sans', sans-serif", marginBottom: '10px',
+                    textAlign: 'center', letterSpacing: '0.15em'
+                  }} />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button disabled={deleteConfirmText !== 'DELETE'} onClick={async () => {
+                    const sid = activeSession.id
+                    await supabase.from('badges').delete().eq('session_id', sid)
+                    await supabase.from('games').delete().eq('session_id', sid)
+                    await supabase.from('session_players').delete().eq('session_id', sid)
+                    await supabase.from('sessions').delete().eq('id', sid)
+                    setShowDeleteSession(false)
+                    setDeleteConfirmText('')
+                    await loadActiveSession()
+                    await loadPlayers()
+                  }} style={{
+                    flex: 1, padding: '12px', borderRadius: '10px',
+                    background: deleteConfirmText === 'DELETE' ? 'var(--red)' : 'var(--surface2)',
+                    border: 'none', color: deleteConfirmText === 'DELETE' ? '#fff' : 'var(--muted)',
+                    fontWeight: 600, fontSize: '13px',
+                    cursor: deleteConfirmText === 'DELETE' ? 'pointer' : 'not-allowed',
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}>Delete Forever</button>
+                  <button onClick={() => { setShowDeleteSession(false); setDeleteConfirmText('') }} style={{
+                    flex: 1, padding: '12px', borderRadius: '10px',
+                    background: 'var(--surface2)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontWeight: 500, fontSize: '13px',
+                    cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
+                  }}>Cancel</button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

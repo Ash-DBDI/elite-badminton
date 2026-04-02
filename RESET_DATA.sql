@@ -1,0 +1,13 @@
+DELETE FROM badges;
+DELETE FROM games;
+DELETE FROM session_players;
+DELETE FROM sessions;
+UPDATE players SET
+  skill_rating = 1000,
+  total_games = 0,
+  total_wins = 0,
+  total_losses = 0,
+  total_points_scored = 0,
+  total_points_conceded = 0,
+  current_streak = 0,
+  best_streak = 0;
