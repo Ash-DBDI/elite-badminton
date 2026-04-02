@@ -22,6 +22,7 @@ export default function SessionSetup() {
   const handleAuth = () => {
     if (pinInput === import.meta.env.VITE_ADMIN_PIN) {
       setAuthenticated(true)
+      sessionStorage.setItem('ebs_admin', pinInput)
     } else {
       alert('Incorrect PIN')
     }

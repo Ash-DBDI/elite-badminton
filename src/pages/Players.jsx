@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSession } from '../context/SessionContext'
 import { supabase } from '../lib/supabase'
@@ -14,6 +14,20 @@ export default function Players() {
   const [name, setName] = useState('')
   const [initials, setInitials] = useState('')
   const [color, setColor] = useState(COLORS[0])
+  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [showInactive, setShowInactive] = useState(false)
+  const [inactivePlayers, setInactivePlayers] = useState([])
+
+  const isAdmin = sessionStorage.getItem('ebs_admin') === import.meta.env.VITE_ADMIN_PIN
+
+  const loadInactivePlayers = async () => {
+    const { data } = await supabase.from('players').select('*').eq('active', false).order('name')
+    setInactivePlayers(data || [])
+  }
+
+  useEffect(() => {
+    if (showInactive) loadInactivePlayers()
+  }, [showInactive])
 
   const handleAdd = async () => {
     if (!name.trim() || !initials.trim()) return
@@ -26,6 +40,19 @@ export default function Players() {
     setInitials('')
     setShowAdd(false)
     await fetchPlayers()
+  }
+
+  const handleDelete = async (player) => {
+    await supabase.from('players').update({ active: false }).eq('id', player.id)
+    setConfirmDelete(null)
+    await fetchPlayers()
+    if (showInactive) await loadInactivePlayers()
+  }
+
+  const handleRestore = async (player) => {
+    await supabase.from('players').update({ active: true }).eq('id', player.id)
+    await fetchPlayers()
+    await loadInactivePlayers()
   }
 
   if (loading) return <div className="page-loading">Loading...</div>
@@ -78,26 +105,102 @@ export default function Players() {
           {players.map(player => {
             const tier = getTier(player.skill_rating)
             return (
-              <div
-                key={player.id}
-                className="player-card"
-                onClick={() => navigate(`/player/${player.id}`)}
-              >
-                <Avatar initials={player.initials} color={player.color} size={48} />
-                <div className="player-card-info">
-                  <span className="player-card-name">{player.name}</span>
-                  <span className="player-card-rating" style={{ color: tier.color }}>
-                    {player.skill_rating} {tier.label}
-                  </span>
-                  <span className="player-card-record">
-                    {player.total_wins}W {player.total_losses}L
-                  </span>
+              <div key={player.id} className="player-card">
+                <div
+                  className="player-card-clickable"
+                  onClick={() => navigate(`/player/${player.id}`)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, cursor: 'pointer' }}
+                >
+                  <Avatar initials={player.initials} color={player.color} size={48} />
+                  <div className="player-card-info">
+                    <span className="player-card-name">{player.name}</span>
+                    <span className="player-card-rating" style={{ color: tier.color }}>
+                      {player.skill_rating} {tier.label}
+                    </span>
+                    <span className="player-card-record">
+                      {player.total_wins}W {player.total_losses}L
+                    </span>
+                  </div>
                 </div>
+                {isAdmin && (
+                  <button
+                    className="btn-icon-delete"
+                    onClick={(e) => { e.stopPropagation(); setConfirmDelete(player) }}
+                    title={`Remove ${player.name}`}
+                  >
+                    {'\u{1F5D1}\u{FE0F}'}
+                  </button>
+                )}
               </div>
             )
           })}
         </div>
+
+        {isAdmin && (
+          <div className="inactive-toggle" style={{ marginTop: 16 }}>
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={() => setShowInactive(!showInactive)}
+            >
+              {showInactive ? 'Hide inactive players' : 'Show inactive players'}
+            </button>
+          </div>
+        )}
+
+        {showInactive && isAdmin && inactivePlayers.length > 0 && (
+          <div className="inactive-players" style={{ marginTop: 12 }}>
+            <h4 style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>Inactive Players</h4>
+            <div className="player-grid">
+              {inactivePlayers.map(player => {
+                const tier = getTier(player.skill_rating)
+                return (
+                  <div key={player.id} className="player-card" style={{ opacity: 0.5 }}>
+                    <Avatar initials={player.initials} color={player.color} size={48} />
+                    <div className="player-card-info" style={{ flex: 1 }}>
+                      <span className="player-card-name">{player.name}</span>
+                      <span className="player-card-rating" style={{ color: tier.color }}>
+                        {player.skill_rating} {tier.label}
+                      </span>
+                      <span className="player-card-record">
+                        {player.total_wins}W {player.total_losses}L
+                      </span>
+                    </div>
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={() => handleRestore(player)}
+                    >
+                      Restore
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {showInactive && isAdmin && inactivePlayers.length === 0 && (
+          <p className="empty-state" style={{ marginTop: 8 }}>No inactive players</p>
+        )}
       </div>
+
+      {confirmDelete && (
+        <div className="modal-overlay" onClick={() => setConfirmDelete(null)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <h3>Remove {confirmDelete.name}?</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '8px 0 16px' }}>
+              Their stats and history will be kept.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => handleDelete(confirmDelete)}>
+                Remove
+              </button>
+              <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setConfirmDelete(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

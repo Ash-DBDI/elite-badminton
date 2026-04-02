@@ -1071,6 +1071,48 @@ body {
   font-size: 14px;
 }
 
+/* === Delete Button === */
+.btn-icon-delete {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  filter: saturate(2);
+}
+.btn-icon-delete:hover {
+  background: rgba(232, 93, 74, 0.15);
+}
+
+/* === Modal === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 16px;
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+.modal-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
 /* === Scrollbar === */
 ::-webkit-scrollbar {
   width: 4px;
