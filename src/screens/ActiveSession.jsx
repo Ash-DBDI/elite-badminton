@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
+import { buildSchedule, reshuffleRemaining } from '../lib/pairing'
 import Avatar from '../components/Avatar'
 
 export default function ActiveSession() {
   const navigate = useNavigate()
-  const { activeSession, loadActiveSession, players } = useApp()
+  const { activeSession, loadActiveSession, players, isAdmin } = useApp()
   const [upcoming, setUpcoming] = useState([])
+  const [generating, setGenerating] = useState(false)
   const now = new Date()
 
   useEffect(() => {
@@ -195,9 +197,134 @@ export default function ActiveSession() {
               })}
             </div>
 
+            {/* Admin: Generate Schedule / Add Player & Reshuffle */}
+            {isAdmin && activeSession && (() => {
+              const gamesExist = (activeSession.games || []).length > 0
+              const checkedInPlayers = sp.filter(s => s.checked_in).map(s => s.players).filter(Boolean)
+              const hasEnough = checkedInPlayers.length >= 4
+
+              // Check if a new player checked in after games were generated
+              const gamePlayerIds = new Set()
+              ;(activeSession.games || []).forEach(g => {
+                ;[g.team_a_player1, g.team_a_player2, g.team_b_player1, g.team_b_player2].forEach(id => { if (id) gamePlayerIds.add(id) })
+                ;(g.sitting_out || []).forEach(id => gamePlayerIds.add(id))
+              })
+              const newCheckedIn = checkedInPlayers.some(p => !gamePlayerIds.has(p.id))
+
+              return (
+                <>
+                  {/* Generate Schedule - no games yet, enough checked in */}
+                  {!gamesExist && hasEnough && (
+                    <button disabled={generating} onClick={async () => {
+                      setGenerating(true)
+                      try {
+                        const schedule = buildSchedule(checkedInPlayers, activeSession.duration_minutes || 120)
+                        if (schedule.length > 0) {
+                          const rows = schedule.map((g, i) => ({
+                            session_id: activeSession.id,
+                            game_number: g.game_number,
+                            status: i === 0 ? 'active' : 'pending',
+                            team_a_player1: g.team_a_player1,
+                            team_a_player2: g.team_a_player2,
+                            team_b_player1: g.team_b_player1,
+                            team_b_player2: g.team_b_player2,
+                            sitting_out: g.sitting_out,
+                            balance_score: g.balance_score
+                          }))
+                          await supabase.from('games').insert(rows)
+                        }
+                        await loadActiveSession()
+                        navigate('/schedule')
+                      } catch (err) {
+                        console.error(err)
+                        alert('Error generating schedule')
+                      } finally {
+                        setGenerating(false)
+                      }
+                    }} style={{
+                      width: '100%', padding: '16px', marginTop: '12px',
+                      borderRadius: '12px', border: 'none',
+                      background: generating ? 'var(--surface2)' : 'var(--gold)',
+                      color: '#111', fontWeight: 700, fontSize: '15px',
+                      cursor: generating ? 'wait' : 'pointer',
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                      {generating ? 'Generating...' : `Generate Schedule (${checkedInPlayers.length} players)`}
+                    </button>
+                  )}
+
+                  {!gamesExist && !hasEnough && (
+                    <div style={{
+                      marginTop: '12px', padding: '12px', borderRadius: '10px',
+                      background: 'var(--surface2)', fontSize: '12px',
+                      color: 'var(--muted)', textAlign: 'center'
+                    }}>
+                      Check in at least 4 players to generate the schedule
+                    </div>
+                  )}
+
+                  {/* Add Player & Reshuffle - games exist, new player checked in */}
+                  {gamesExist && newCheckedIn && hasEnough && (
+                    <button disabled={generating} onClick={async () => {
+                      setGenerating(true)
+                      try {
+                        const allGames = activeSession.games || []
+                        const completedGames = allGames.filter(g => g.status === 'completed')
+                        const pendingGames = allGames.filter(g => g.status === 'pending').sort((a2, b2) => a2.game_number - b2.game_number)
+                        const activeGame = allGames.find(g => g.status === 'active')
+
+                        // Delete all pending games
+                        if (pendingGames.length > 0) {
+                          await supabase.from('games').delete().eq('session_id', activeSession.id).eq('status', 'pending')
+                        }
+
+                        // Reshuffle with all checked-in players
+                        const nextNum = activeGame
+                          ? activeGame.game_number + 1
+                          : (completedGames.length > 0 ? Math.max(...completedGames.map(g => g.game_number)) + 1 : 1)
+                        const totalMins = activeSession.duration_minutes || 120
+                        const minsPerGame = 12
+                        const gamesLeft = Math.max(1, Math.floor(totalMins / minsPerGame) - completedGames.length - (activeGame ? 1 : 0))
+
+                        const reshuffled = reshuffleRemaining(checkedInPlayers, completedGames, gamesLeft, nextNum)
+                        if (reshuffled.length > 0) {
+                          const rows = reshuffled.map(g => ({
+                            session_id: activeSession.id,
+                            game_number: g.game_number,
+                            status: 'pending',
+                            team_a_player1: g.team_a_player1,
+                            team_a_player2: g.team_a_player2,
+                            team_b_player1: g.team_b_player1,
+                            team_b_player2: g.team_b_player2,
+                            sitting_out: g.sitting_out,
+                            balance_score: g.balance_score
+                          }))
+                          await supabase.from('games').insert(rows)
+                        }
+                        await loadActiveSession()
+                      } catch (err) {
+                        console.error(err)
+                        alert('Error reshuffling')
+                      } finally {
+                        setGenerating(false)
+                      }
+                    }} style={{
+                      width: '100%', padding: '14px', marginTop: '12px',
+                      borderRadius: '12px', border: '1px solid var(--gold-border)',
+                      background: 'var(--gold-dim)', color: 'var(--gold)',
+                      fontWeight: 600, fontSize: '13px', cursor: generating ? 'wait' : 'pointer',
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                      {generating ? 'Reshuffling...' : 'Add New Player & Reshuffle'}
+                    </button>
+                  )}
+                </>
+              )
+            })()}
+
             {/* Go to schedule button */}
             <button onClick={() => navigate('/schedule')} style={{
-              width: '100%', padding: '14px', marginTop: '16px',
+              width: '100%', padding: '14px', marginTop: '12px',
               borderRadius: '12px', border: '1px solid var(--gold-border)',
               background: 'var(--gold-dim)', color: 'var(--gold)',
               fontWeight: 600, fontSize: '14px', cursor: 'pointer',

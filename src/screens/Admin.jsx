@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
-import { buildSchedule } from '../lib/pairing'
+// Schedule is generated from ActiveSession screen after players check in
 import Avatar from '../components/Avatar'
 import PinGate from '../components/PinGate'
 
@@ -80,31 +80,12 @@ export default function Admin() {
       }).select().single()
       if (error) throw error
 
-      // 2. Insert session_players
+      // 2. Insert session_players (no one checked in yet)
       const selIds = Object.entries(selectedPlayers).filter(([, v]) => v).map(([k]) => k)
       const spRows = selIds.map(pid => ({ session_id: session.id, player_id: pid, checked_in: false }))
       await supabase.from('session_players').insert(spRows)
 
-      // 3. Generate schedule
-      const selPlayers = players.filter(p => selIds.includes(p.id))
-      const schedule = buildSchedule(selPlayers, duration)
-
-      // 4. Save all games - set first to 'active'
-      if (schedule.length > 0) {
-        const gameRows = schedule.map((g, i) => ({
-          session_id: session.id,
-          game_number: g.game_number,
-          status: i === 0 ? 'active' : 'pending',
-          team_a_player1: g.team_a_player1,
-          team_a_player2: g.team_a_player2,
-          team_b_player1: g.team_b_player1,
-          team_b_player2: g.team_b_player2,
-          sitting_out: g.sitting_out,
-          balance_score: g.balance_score
-        }))
-        await supabase.from('games').insert(gameRows)
-      }
-
+      // Schedule will be generated from ActiveSession screen once players check in
       await loadActiveSession()
       navigate('/')
     } catch (err) {

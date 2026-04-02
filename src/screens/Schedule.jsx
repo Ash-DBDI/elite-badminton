@@ -112,32 +112,39 @@ export default function Schedule() {
         }).eq('id', pid)
       }
 
-      // 4. Activate next pending game
-      const allPending = games
-        .filter(g => g.status === 'pending' && g.id !== currentGame.id)
-        .sort((a2, b2) => a2.game_number - b2.game_number)
-      if (allPending.length > 0) {
-        await supabase.from('games').update({ status: 'active' }).eq('id', allPending[0].id)
-      }
-
-      // 5. Reshuffle remaining pending games
+      // 4. Reshuffle: delete all pending games, regenerate, then activate the first one
       const updatedCompleted = [...completed, { ...currentGame, team_a_score: a, team_b_score: b }]
-      const remainingPending = allPending.slice(1)
-      if (remainingPending.length > 0) {
-        const activePlayers = spList.filter(s => s.checked_in).map(s => s.players).filter(Boolean)
-        const reshuffled = reshuffleRemaining(
-          activePlayers, updatedCompleted, remainingPending.length,
-          (allPending[0]?.game_number || currentGame.game_number) + 1
-        )
-        for (let i = 0; i < remainingPending.length && i < reshuffled.length; i++) {
-          await supabase.from('games').update({
-            team_a_player1: reshuffled[i].team_a_player1,
-            team_a_player2: reshuffled[i].team_a_player2,
-            team_b_player1: reshuffled[i].team_b_player1,
-            team_b_player2: reshuffled[i].team_b_player2,
-            sitting_out: reshuffled[i].sitting_out,
-            balance_score: reshuffled[i].balance_score
-          }).eq('id', remainingPending[i].id)
+
+      // Delete all pending games for this session
+      await supabase.from('games').delete().eq('session_id', activeSession.id).eq('status', 'pending')
+
+      // Reload session_players to get fresh stats after our updates above
+      const { data: freshSp } = await supabase
+        .from('session_players').select('*, players(*)').eq('session_id', activeSession.id)
+      const activePlayers = (freshSp || []).filter(s => s.checked_in).map(s => s.players).filter(Boolean)
+
+      if (activePlayers.length >= 4) {
+        const nextNum = currentGame.game_number + 1
+        const totalMins = activeSession.duration_minutes || 120
+        const minsPerGame = 12
+        const pendingCount = Math.max(0, Math.floor(totalMins / minsPerGame) - updatedCompleted.length)
+
+        if (pendingCount > 0) {
+          const reshuffled = reshuffleRemaining(activePlayers, updatedCompleted, pendingCount, nextNum)
+          if (reshuffled.length > 0) {
+            const rows = reshuffled.map((g, i) => ({
+              session_id: activeSession.id,
+              game_number: g.game_number,
+              status: i === 0 ? 'active' : 'pending',
+              team_a_player1: g.team_a_player1,
+              team_a_player2: g.team_a_player2,
+              team_b_player1: g.team_b_player1,
+              team_b_player2: g.team_b_player2,
+              sitting_out: g.sitting_out,
+              balance_score: g.balance_score
+            }))
+            await supabase.from('games').insert(rows)
+          }
         }
       }
 
