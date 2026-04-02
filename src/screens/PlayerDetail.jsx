@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { tier } from '../lib/elo'
 import Avatar from '../components/Avatar'
+import Header from '../components/Header'
 
 const BADGE_DEFS = {
   HOT_HAND: { icon: '\u{1F525}', label: 'Hot Hand' }, LIGHTNING: { icon: '\u{26A1}', label: 'Lightning' },
@@ -79,10 +80,7 @@ export default function PlayerDetail() {
 
   return (
     <div className="screen" style={{ padding: '16px 16px 90px' }}>
-      {/* Back */}
-      <button onClick={() => navigate('/players')} style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: '14px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", marginBottom: '16px', padding: '4px 0' }}>
-        {'\u2190'} Back to Players
-      </button>
+      <Header title="Player Profile" showBack />
 
       {/* Header */}
       <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', textAlign: 'center', marginBottom: '12px' }}>

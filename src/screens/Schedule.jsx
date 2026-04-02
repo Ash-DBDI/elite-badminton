@@ -5,6 +5,7 @@ import { expectedScore, updatedRating, teamRating } from '../lib/elo'
 import { reshuffleRemaining } from '../lib/pairing'
 import Avatar from '../components/Avatar'
 import PinGate from '../components/PinGate'
+import Header from '../components/Header'
 
 const pmBtn = {
   width: '56px', height: '64px', borderRadius: '12px',
@@ -278,6 +279,7 @@ export default function Schedule() {
 
   return (
     <div className="screen" style={{ padding: '20px 16px 90px' }}>
+      <Header />
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', fontWeight: 300, marginBottom: '20px' }}>Schedule</div>
 
       {swapMsg && <div style={{ background: 'var(--green-dim)', color: 'var(--green)', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: 500, textAlign: 'center', marginBottom: '12px' }}>{swapMsg}</div>}

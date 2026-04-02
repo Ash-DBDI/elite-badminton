@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import { buildSchedule, reshuffleRemaining } from '../lib/pairing'
 import Avatar from '../components/Avatar'
+import Header from '../components/Header'
 
 export default function ActiveSession() {
   const navigate = useNavigate()
@@ -52,19 +53,7 @@ export default function ActiveSession() {
 
   return (
     <div className="screen" style={{ padding: '24px 16px 90px' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: '28px', fontWeight: 300, color: 'var(--gold)',
-          marginBottom: '4px'
-        }}>Elite Badminton Social</h1>
-        <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
-          {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-          {' \u00B7 '}
-          {now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-        </div>
-      </div>
+      <Header />
 
       {!activeSession ? (
         <>

@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { tier } from '../lib/elo'
 import Avatar from '../components/Avatar'
 import { AVATARS } from '../components/avatars/index.jsx'
+import Header from '../components/Header'
 
 export default function Players() {
   const { players, loadPlayers, isAdmin } = useApp()
@@ -73,6 +74,7 @@ export default function Players() {
 
   return (
     <div className="screen" style={{ padding: '20px 16px 90px' }}>
+      <Header />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', fontWeight: 300 }}>Players</div>
         {isAdmin && (

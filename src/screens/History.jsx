@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import Avatar from '../components/Avatar'
+import Header from '../components/Header'
 
 const BADGE_DEFS = {
   HOT_HAND: { icon: '\u{1F525}', label: 'Hot Hand' },
@@ -89,6 +90,7 @@ export default function History() {
 
   return (
     <div className="screen" style={{ padding: '20px 16px 90px' }}>
+      <Header />
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', fontWeight: 300, marginBottom: '20px' }}>
         History
       </div>

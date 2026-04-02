@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 // Schedule is generated from ActiveSession screen after players check in
 import Avatar from '../components/Avatar'
 import PinGate from '../components/PinGate'
+import Header from '../components/Header'
 
 const HOURS = []
 for (let h = 6; h <= 22; h++) HOURS.push(h)
@@ -169,6 +170,7 @@ export default function Admin() {
   return (
     <PinGate>
       <div className="screen" style={{ padding: '20px 16px 90px' }}>
+        <Header />
         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', fontWeight: 300, marginBottom: '24px' }}>
           Admin
         </div>

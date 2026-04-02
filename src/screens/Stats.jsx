@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import { tier } from '../lib/elo'
 import Avatar from '../components/Avatar'
+import Header from '../components/Header'
 
 const BADGE_DEFS = {
   HOT_HAND: { icon: '\u{1F525}', label: 'Hot Hand', desc: '3 wins in a row' },
@@ -66,6 +67,7 @@ export default function Stats() {
 
   return (
     <div className="screen" style={{ padding: '20px 16px 90px' }}>
+      <Header />
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', fontWeight: 300, marginBottom: '20px' }}>Stats</div>
 
       {/* Tab toggle */}

@@ -1,207 +1,398 @@
+// THE SMASHER — overhead smash, cape, lightning bolt
 function Smasher() {
   return (
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <circle cx="100" cy="55" r="16" fill="#c9a84c"/>
-      <path d="M100 72 C80 72 68 90 68 110 L68 130 L80 130 L80 105 L88 105 L75 80 L100 72Z" fill="#fff" opacity="0.9"/>
-      <path d="M100 72 C120 72 132 90 132 110 L132 130 L120 130 L120 105 L112 105 L125 80 L100 72Z" fill="#fff" opacity="0.9"/>
-      <line x1="125" y1="50" x2="145" y2="30" stroke="#c9a84c" strokeWidth="4" strokeLinecap="round"/>
-      <ellipse cx="150" cy="26" rx="12" ry="6" fill="#c9a84c" opacity="0.7" transform="rotate(-30 150 26)"/>
-      <path d="M80 130 L80 170 L90 170 L90 130Z" fill="#fff" opacity="0.8"/>
-      <path d="M110 130 L110 170 L120 170 L120 130Z" fill="#fff" opacity="0.8"/>
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Cape */}
+      <path d="M70 75 Q55 110 50 160 L85 130 Q80 100 78 80Z" fill="#0d3d24" opacity="0.8"/>
+      <path d="M130 75 Q145 110 150 160 L115 130 Q120 100 122 80Z" fill="#0d3d24" opacity="0.8"/>
+      {/* Body */}
+      <rect x="80" y="70" width="40" height="50" rx="4" fill="#c9a84c"/>
+      {/* Lightning bolt on chest */}
+      <polygon points="96,78 102,78 98,90 105,90 93,108 97,95 90,95" fill="#0a0a0a"/>
+      {/* Head */}
+      <circle cx="100" cy="55" r="18" fill="#c9a84c"/>
+      <rect x="88" y="46" width="24" height="6" rx="3" fill="#0a0a0a" opacity="0.7"/>
+      {/* Raised arm + racket */}
+      <rect x="118" y="40" width="10" height="40" rx="4" fill="#c9a84c" transform="rotate(20 123 60)"/>
+      <ellipse cx="135" cy="28" rx="10" ry="14" fill="none" stroke="#c9a84c" strokeWidth="2.5" transform="rotate(20 135 28)"/>
+      {/* Other arm */}
+      <rect x="68" y="78" width="10" height="30" rx="4" fill="#c9a84c" transform="rotate(-20 73 93)"/>
+      {/* Legs */}
+      <rect x="83" y="118" width="14" height="40" rx="4" fill="#c9a84c"/>
+      <rect x="103" y="118" width="14" height="40" rx="4" fill="#c9a84c"/>
+      {/* Energy lines */}
+      <line x1="145" y1="15" x2="160" y2="8" stroke="#c9a84c" strokeWidth="2" opacity="0.5"/>
+      <line x1="150" y1="25" x2="168" y2="20" stroke="#c9a84c" strokeWidth="1.5" opacity="0.4"/>
+      <line x1="140" y1="10" x2="155" y2="2" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
+      {/* Name */}
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE SMASHER</text>
     </svg>
   )
 }
 
-function Defender() {
+// THE GUARDIAN — defensive wide stance, shield energy
+function Guardian() {
   return (
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <circle cx="100" cy="65" r="16" fill="#c9a84c"/>
-      <path d="M70 85 L60 120 L75 125 L85 100 L100 82 L115 100 L125 125 L140 120 L130 85 L100 82Z" fill="#fff" opacity="0.9"/>
-      <path d="M60 120 L55 135 L75 140 L75 125Z" fill="#c9a84c" opacity="0.6"/>
-      <path d="M140 120 L145 135 L125 140 L125 125Z" fill="#c9a84c" opacity="0.6"/>
-      <path d="M75 140 L65 175 L80 175 L85 140Z" fill="#fff" opacity="0.8"/>
-      <path d="M115 140 L120 175 L135 175 L125 140Z" fill="#fff" opacity="0.8"/>
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Shield energy */}
+      <ellipse cx="100" cy="95" rx="55" ry="45" fill="none" stroke="#0d3d24" strokeWidth="3" opacity="0.5"/>
+      <ellipse cx="100" cy="95" rx="65" ry="52" fill="none" stroke="#0d3d24" strokeWidth="1.5" opacity="0.3"/>
+      {/* Head */}
+      <circle cx="100" cy="48" r="17" fill="#c9a84c"/>
+      <rect x="86" y="40" width="28" height="5" rx="2.5" fill="#0a0a0a" opacity="0.7"/>
+      {/* Body — wide stance */}
+      <path d="M82 65 L78 115 L122 115 L118 65Z" fill="#c9a84c"/>
+      {/* Shield emblem on chest */}
+      <path d="M95 75 L95 92 Q100 97 105 92 L105 75Z" fill="#0d3d24"/>
+      {/* Arms spread wide */}
+      <rect x="40" y="72" width="42" height="11" rx="5" fill="#c9a84c"/>
+      <rect x="118" y="72" width="42" height="11" rx="5" fill="#c9a84c"/>
+      {/* Fists */}
+      <circle cx="38" cy="77" r="8" fill="#c9a84c"/>
+      <circle cx="162" cy="77" r="8" fill="#c9a84c"/>
+      {/* Wide legs */}
+      <rect x="72" y="113" width="16" height="42" rx="5" fill="#c9a84c" transform="rotate(-10 80 134)"/>
+      <rect x="112" y="113" width="16" height="42" rx="5" fill="#c9a84c" transform="rotate(10 120 134)"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE GUARDIAN</text>
     </svg>
   )
 }
 
-function NetPlayer() {
+// THE PHANTOM — mysterious figure at net, speed lines
+function Phantom() {
   return (
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <line x1="0" y1="130" x2="200" y2="130" stroke="#c9a84c" strokeWidth="2" opacity="0.3"/>
-      <line x1="20" y1="130" x2="20" y2="140" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
-      <line x1="60" y1="130" x2="60" y2="140" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
-      <line x1="100" y1="130" x2="100" y2="140" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
-      <line x1="140" y1="130" x2="140" y2="140" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
-      <line x1="180" y1="130" x2="180" y2="140" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
-      <circle cx="90" cy="55" r="15" fill="#c9a84c"/>
-      <path d="M90 71 C70 71 62 90 62 108 L62 128 L118 128 L118 108 C118 90 110 71 90 71Z" fill="#fff" opacity="0.9"/>
-      <line x1="118" y1="85" x2="140" y2="60" stroke="#c9a84c" strokeWidth="4" strokeLinecap="round"/>
-      <ellipse cx="145" cy="55" rx="14" ry="8" fill="none" stroke="#c9a84c" strokeWidth="2"/>
-      <path d="M70 128 L65 175 L80 175 L82 128Z" fill="#fff" opacity="0.8"/>
-      <path d="M98 128 L100 175 L115 175 L110 128Z" fill="#fff" opacity="0.8"/>
+      <circle cx="100" cy="100" r="100" fill="#0d1a0d"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Net */}
+      <line x1="0" y1="130" x2="200" y2="130" stroke="#c9a84c" strokeWidth="1.5" opacity="0.2"/>
+      {/* Speed lines */}
+      <line x1="20" y1="50" x2="55" y2="55" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
+      <line x1="15" y1="65" x2="50" y2="68" stroke="#c9a84c" strokeWidth="1.5" opacity="0.25"/>
+      <line x1="25" y1="80" x2="55" y2="82" stroke="#c9a84c" strokeWidth="1" opacity="0.2"/>
+      {/* Head with mask */}
+      <circle cx="95" cy="52" r="18" fill="#c9a84c"/>
+      <path d="M80 46 L110 46 L108 56 L82 56Z" fill="#0d1a0d"/>
+      <circle cx="88" cy="50" r="2" fill="#c9a84c"/>
+      <circle cx="102" cy="50" r="2" fill="#c9a84c"/>
+      {/* Ghostly body */}
+      <path d="M78 70 L75 128 L125 128 L122 70Z" fill="#c9a84c" opacity="0.85"/>
+      {/* Reaching arm up at net */}
+      <rect x="120" y="38" width="10" height="45" rx="4" fill="#c9a84c" transform="rotate(15 125 60)"/>
+      <circle cx="135" cy="35" r="6" fill="#c9a84c"/>
+      {/* Other arm */}
+      <rect x="62" y="80" width="10" height="30" rx="4" fill="#c9a84c" transform="rotate(-15 67 95)"/>
+      {/* Ghost trail */}
+      <path d="M75 128 Q70 145 60 155 L85 145 Q80 140 78 128Z" fill="#c9a84c" opacity="0.3"/>
+      <path d="M125 128 Q130 145 140 155 L115 145 Q120 140 122 128Z" fill="#c9a84c" opacity="0.3"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE PHANTOM</text>
     </svg>
   )
 }
 
-function Serve() {
+// THE ACE — serving with starburst
+function Ace() {
   return (
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <circle cx="105" cy="50" r="15" fill="#c9a84c"/>
-      <path d="M105 66 C85 66 78 85 78 105 L78 135 L132 135 L132 105 C132 85 125 66 105 66Z" fill="#fff" opacity="0.9"/>
-      <line x1="132" y1="95" x2="155" y2="70" stroke="#c9a84c" strokeWidth="4" strokeLinecap="round"/>
-      <ellipse cx="160" cy="65" rx="12" ry="7" fill="none" stroke="#c9a84c" strokeWidth="2"/>
-      <circle cx="78" cy="45" r="6" fill="#c9a84c" opacity="0.5"/>
-      <line x1="78" y1="45" x2="78" y2="38" stroke="#c9a84c" strokeWidth="1.5" opacity="0.5"/>
-      <line x1="78" y1="38" x2="73" y2="32" stroke="#c9a84c" strokeWidth="1" opacity="0.4"/>
-      <line x1="78" y1="38" x2="83" y2="32" stroke="#c9a84c" strokeWidth="1" opacity="0.4"/>
-      <path d="M85 135 L80 175 L95 175 L95 135Z" fill="#fff" opacity="0.8"/>
-      <path d="M115 135 L115 175 L130 175 L125 135Z" fill="#fff" opacity="0.8"/>
-    </svg>
-  )
-}
-
-function Backhand() {
-  return (
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <circle cx="110" cy="58" r="15" fill="#c9a84c"/>
-      <path d="M110 74 C90 74 82 92 82 110 L82 138 L138 138 L138 110 C138 92 130 74 110 74Z" fill="#fff" opacity="0.9"/>
-      <line x1="82" y1="100" x2="55" y2="75" stroke="#c9a84c" strokeWidth="4" strokeLinecap="round"/>
-      <ellipse cx="48" cy="70" rx="12" ry="7" fill="none" stroke="#c9a84c" strokeWidth="2"/>
-      <path d="M90 138 L85 178 L100 178 L100 138Z" fill="#fff" opacity="0.8"/>
-      <path d="M120 138 L120 178 L135 178 L130 138Z" fill="#fff" opacity="0.8"/>
-    </svg>
-  )
-}
-
-function Shuttle() {
-  return (
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <ellipse cx="100" cy="120" rx="18" ry="20" fill="#c9a84c"/>
-      <path d="M82 110 L70 50 L85 55 L88 110Z" fill="#fff" opacity="0.7"/>
-      <path d="M88 108 L80 50 L95 52 L93 108Z" fill="#fff" opacity="0.8"/>
-      <path d="M95 106 L93 48 L107 48 L105 106Z" fill="#fff" opacity="0.9"/>
-      <path d="M107 108 L105 52 L120 50 L112 108Z" fill="#fff" opacity="0.8"/>
-      <path d="M112 110 L115 55 L130 50 L118 110Z" fill="#fff" opacity="0.7"/>
-      <circle cx="100" cy="124" r="8" fill="#1a1a1a" opacity="0.3"/>
-    </svg>
-  )
-}
-
-function Racket() {
-  return (
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <ellipse cx="100" cy="70" rx="35" ry="42" fill="none" stroke="#c9a84c" strokeWidth="4"/>
-      <line x1="100" y1="45" x2="100" y2="95" stroke="#c9a84c" strokeWidth="1.5" opacity="0.4"/>
-      <line x1="75" y1="60" x2="125" y2="60" stroke="#c9a84c" strokeWidth="1.5" opacity="0.4"/>
-      <line x1="75" y1="75" x2="125" y2="75" stroke="#c9a84c" strokeWidth="1.5" opacity="0.4"/>
-      <line x1="85" y1="45" x2="85" y2="95" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
-      <line x1="115" y1="45" x2="115" y2="95" stroke="#c9a84c" strokeWidth="1" opacity="0.3"/>
-      <rect x="96" y="112" width="8" height="45" rx="3" fill="#c9a84c"/>
-      <rect x="92" y="155" width="16" height="12" rx="3" fill="#c9a84c" opacity="0.8"/>
-      <polygon points="100,38 96,32 104,32" fill="#c9a84c"/>
-    </svg>
-  )
-}
-
-function Trophy() {
-  return (
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <path d="M70 55 L70 100 C70 120 83 135 100 135 C117 135 130 120 130 100 L130 55Z" fill="#c9a84c"/>
-      <path d="M70 65 L50 65 L50 85 C50 95 58 100 70 100Z" fill="#c9a84c" opacity="0.7"/>
-      <path d="M130 65 L150 65 L150 85 C150 95 142 100 130 100Z" fill="#c9a84c" opacity="0.7"/>
-      <rect x="95" y="135" width="10" height="15" fill="#c9a84c" opacity="0.8"/>
-      <rect x="80" y="150" width="40" height="8" rx="3" fill="#c9a84c"/>
-      <circle cx="100" cy="42" r="7" fill="#1a1a1a" opacity="0.3"/>
-      <line x1="100" y1="35" x2="100" y2="28" stroke="#fff" strokeWidth="2" opacity="0.5"/>
-      <line x1="95" y1="30" x2="105" y2="30" stroke="#fff" strokeWidth="2" opacity="0.5"/>
-    </svg>
-  )
-}
-
-function Jump() {
-  return (
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <circle cx="100" cy="42" r="15" fill="#c9a84c"/>
-      <path d="M100 58 C82 58 75 75 75 92 L75 105 L125 105 L125 92 C125 75 118 58 100 58Z" fill="#fff" opacity="0.9"/>
-      <line x1="125" y1="70" x2="150" y2="42" stroke="#c9a84c" strokeWidth="4" strokeLinecap="round"/>
-      <ellipse cx="156" cy="37" rx="13" ry="7" fill="none" stroke="#c9a84c" strokeWidth="2"/>
-      <path d="M82 105 L70 140 L85 142 L90 105Z" fill="#fff" opacity="0.8"/>
-      <path d="M110 105 L115 142 L130 140 L118 105Z" fill="#fff" opacity="0.8"/>
-      <line x1="70" y1="140" x2="60" y2="155" stroke="#fff" strokeWidth="5" strokeLinecap="round" opacity="0.8"/>
-      <line x1="130" y1="140" x2="140" y2="155" stroke="#fff" strokeWidth="5" strokeLinecap="round" opacity="0.8"/>
-      <line x1="85" y1="170" x2="115" y2="170" stroke="#c9a84c" strokeWidth="2" opacity="0.3" strokeDasharray="4 4"/>
-    </svg>
-  )
-}
-
-function Coach() {
-  return (
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Starburst behind */}
+      {[0,45,90,135,180,225,270,315].map(a => <line key={a} x1="100" y1="55" x2={100 + 50 * Math.cos(a * Math.PI/180)} y2={55 + 50 * Math.sin(a * Math.PI/180)} stroke="#c9a84c" strokeWidth="1" opacity="0.15"/>)}
+      {/* Head */}
       <circle cx="100" cy="55" r="17" fill="#c9a84c"/>
-      <path d="M100 73 C78 73 68 92 68 112 L68 145 L132 145 L132 112 C132 92 122 73 100 73Z" fill="#fff" opacity="0.9"/>
-      <path d="M68 100 L50 110 L50 105 L68 95Z" fill="#fff" opacity="0.8"/>
-      <path d="M132 100 L150 110 L150 105 L132 95Z" fill="#fff" opacity="0.8"/>
-      <rect x="90" y="85" width="20" height="3" rx="1" fill="#c9a84c" opacity="0.5"/>
-      <path d="M78 145 L75 180 L90 180 L90 145Z" fill="#fff" opacity="0.8"/>
-      <path d="M110 145 L110 180 L125 180 L122 145Z" fill="#fff" opacity="0.8"/>
+      <rect x="88" y="48" width="24" height="5" rx="2.5" fill="#0a0a0a" opacity="0.6"/>
+      {/* Body */}
+      <rect x="82" y="72" width="36" height="48" rx="4" fill="#c9a84c"/>
+      {/* Star on chest */}
+      <polygon points="100,78 102,84 108,84 103,88 105,94 100,90 95,94 97,88 92,84 98,84" fill="#0a0a0a" opacity="0.6"/>
+      {/* Toss arm raised */}
+      <rect x="70" y="52" width="10" height="35" rx="4" fill="#c9a84c" transform="rotate(-30 75 70)"/>
+      {/* Shuttle above toss hand */}
+      <ellipse cx="58" cy="38" rx="5" ry="4" fill="white" opacity="0.8"/>
+      <path d="M54 35 Q58 26 62 35" fill="none" stroke="white" strokeWidth="1" opacity="0.6"/>
+      {/* Racket arm cocked */}
+      <rect x="118" y="65" width="10" height="35" rx="4" fill="#c9a84c" transform="rotate(30 123 82)"/>
+      <ellipse cx="140" cy="55" rx="9" ry="12" fill="none" stroke="#c9a84c" strokeWidth="2" transform="rotate(30 140 55)"/>
+      {/* Legs */}
+      <rect x="85" y="118" width="13" height="38" rx="4" fill="#c9a84c"/>
+      <rect x="102" y="118" width="13" height="38" rx="4" fill="#c9a84c"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE ACE</text>
     </svg>
   )
 }
 
-function Veteran() {
+// THE BLADE — backhand with energy blade
+function Blade() {
   return (
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <circle cx="100" cy="58" r="16" fill="#c9a84c"/>
-      <path d="M100 75 C80 75 72 92 72 112 L72 148 L128 148 L128 112 C128 92 120 75 100 75Z" fill="#fff" opacity="0.85"/>
-      <line x1="72" y1="100" x2="58" y2="130" stroke="#c9a84c" strokeWidth="3" strokeLinecap="round"/>
-      <ellipse cx="54" cy="134" rx="10" ry="6" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.7"/>
-      <path d="M80 148 L78 180 L92 180 L90 148Z" fill="#fff" opacity="0.8"/>
-      <path d="M110 148 L110 180 L122 180 L120 148Z" fill="#fff" opacity="0.8"/>
-      <path d="M85 40 L100 44 L115 40" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.5"/>
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Energy blade trail */}
+      <path d="M30 60 Q50 45 55 55 Q48 50 35 62Z" fill="#c9a84c" opacity="0.3"/>
+      <path d="M25 55 Q45 38 52 50 Q42 42 30 58Z" fill="#c9a84c" opacity="0.2"/>
+      {/* Head */}
+      <circle cx="105" cy="52" r="17" fill="#c9a84c"/>
+      <path d="M92 45 L118 45 L116 52 L94 52Z" fill="#0a0a0a" opacity="0.6"/>
+      {/* Body twisted */}
+      <path d="M88 70 L85 118 L125 118 L122 70Z" fill="#c9a84c"/>
+      {/* Blade emblem */}
+      <path d="M100 80 L108 95 L100 110 L92 95Z" fill="#0a0a0a" opacity="0.4"/>
+      {/* Backhand arm with racket */}
+      <rect x="55" y="60" width="35" height="10" rx="4" fill="#c9a84c" transform="rotate(-10 72 65)"/>
+      <ellipse cx="45" cy="55" rx="10" ry="13" fill="none" stroke="#c9a84c" strokeWidth="2.5" transform="rotate(-10 45 55)"/>
+      {/* Energy glow on racket */}
+      <ellipse cx="45" cy="55" rx="14" ry="17" fill="none" stroke="#c9a84c" strokeWidth="1" opacity="0.3" transform="rotate(-10 45 55)"/>
+      {/* Other arm */}
+      <rect x="120" y="75" width="10" height="28" rx="4" fill="#c9a84c" transform="rotate(15 125 89)"/>
+      {/* Legs */}
+      <rect x="85" y="116" width="14" height="40" rx="5" fill="#c9a84c" transform="rotate(-5 92 136)"/>
+      <rect x="105" y="116" width="14" height="40" rx="5" fill="#c9a84c" transform="rotate(8 112 136)"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE BLADE</text>
     </svg>
   )
 }
 
+// THE FALCON — airborne jump smash, wings
+function Falcon() {
+  return (
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Wing shapes */}
+      <path d="M70 65 Q30 55 20 75 Q40 70 65 80Z" fill="#0d3d24" opacity="0.7"/>
+      <path d="M130 65 Q170 55 180 75 Q160 70 135 80Z" fill="#0d3d24" opacity="0.7"/>
+      {/* Head */}
+      <circle cx="100" cy="45" r="16" fill="#c9a84c"/>
+      <path d="M88 38 L112 38 L110 45 L90 45Z" fill="#0a0a0a" opacity="0.6"/>
+      {/* Body */}
+      <rect x="84" y="60" width="32" height="42" rx="4" fill="#c9a84c"/>
+      {/* Falcon emblem */}
+      <path d="M100 68 L106 78 L100 88 L94 78Z" fill="#0d3d24"/>
+      {/* Arms spread */}
+      <rect x="42" y="58" width="42" height="10" rx="4" fill="#c9a84c" transform="rotate(-15 63 63)"/>
+      <rect x="116" y="58" width="42" height="10" rx="4" fill="#c9a84c" transform="rotate(15 137 63)"/>
+      {/* Racket */}
+      <ellipse cx="165" cy="48" rx="10" ry="13" fill="none" stroke="#c9a84c" strokeWidth="2" transform="rotate(15 165 48)"/>
+      {/* Legs tucked */}
+      <rect x="86" y="100" width="12" height="35" rx="4" fill="#c9a84c" transform="rotate(15 92 118)"/>
+      <rect x="102" y="100" width="12" height="35" rx="4" fill="#c9a84c" transform="rotate(-15 108 118)"/>
+      {/* Shuttle trail */}
+      <circle cx="170" cy="30" r="4" fill="white" opacity="0.6"/>
+      <line x1="170" y1="30" x2="185" y2="22" stroke="white" strokeWidth="1" opacity="0.3"/>
+      <line x1="170" y1="30" x2="180" y2="18" stroke="white" strokeWidth="1" opacity="0.3"/>
+      {/* Air gap line */}
+      <line x1="60" y1="148" x2="140" y2="148" stroke="#c9a84c" strokeWidth="1" opacity="0.15" strokeDasharray="4 4"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE FALCON</text>
+    </svg>
+  )
+}
+
+// THE TITAN — massive power stance
+function Titan() {
+  return (
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Head */}
+      <circle cx="100" cy="42" r="20" fill="#c9a84c"/>
+      <rect x="85" y="34" width="30" height="7" rx="3" fill="#0a0a0a" opacity="0.6"/>
+      {/* Massive body */}
+      <path d="M72 62 L68 120 L132 120 L128 62Z" fill="#c9a84c"/>
+      {/* Chest detail */}
+      <line x1="100" y1="68" x2="100" y2="115" stroke="#0a0a0a" strokeWidth="2" opacity="0.3"/>
+      <line x1="80" y1="80" x2="120" y2="80" stroke="#0a0a0a" strokeWidth="1.5" opacity="0.2"/>
+      {/* Thick arms */}
+      <rect x="40" y="65" width="32" height="14" rx="6" fill="#c9a84c"/>
+      <rect x="128" y="65" width="32" height="14" rx="6" fill="#c9a84c"/>
+      {/* Fists */}
+      <circle cx="38" cy="72" r="10" fill="#c9a84c"/>
+      <circle cx="162" cy="72" r="10" fill="#c9a84c"/>
+      {/* Wide legs */}
+      <rect x="68" y="118" width="18" height="42" rx="6" fill="#c9a84c" transform="rotate(-8 77 139)"/>
+      <rect x="114" y="118" width="18" height="42" rx="6" fill="#c9a84c" transform="rotate(8 123 139)"/>
+      {/* Power cracks */}
+      <line x1="35" y1="155" x2="25" y2="165" stroke="#c9a84c" strokeWidth="2" opacity="0.3"/>
+      <line x1="165" y1="155" x2="175" y2="165" stroke="#c9a84c" strokeWidth="2" opacity="0.3"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE TITAN</text>
+    </svg>
+  )
+}
+
+// THE SWIFT — sprinting, extreme lean, speed lines
+function Swift() {
+  return (
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Speed lines */}
+      <line x1="10" y1="60" x2="50" y2="62" stroke="#c9a84c" strokeWidth="2" opacity="0.25"/>
+      <line x1="15" y1="75" x2="55" y2="76" stroke="#c9a84c" strokeWidth="1.5" opacity="0.2"/>
+      <line x1="8" y1="90" x2="48" y2="90" stroke="#c9a84c" strokeWidth="2" opacity="0.3"/>
+      <line x1="12" y1="105" x2="52" y2="104" stroke="#c9a84c" strokeWidth="1.5" opacity="0.2"/>
+      <line x1="18" y1="118" x2="55" y2="116" stroke="#c9a84c" strokeWidth="1" opacity="0.15"/>
+      {/* Head leaning forward */}
+      <circle cx="120" cy="50" r="16" fill="#c9a84c"/>
+      <path d="M108 44 L132 44 L130 50 L110 50Z" fill="#0a0a0a" opacity="0.6"/>
+      {/* Body at extreme lean */}
+      <path d="M95 65 L80 120 L115 120 L118 65Z" fill="#c9a84c" transform="rotate(15 100 92)"/>
+      {/* Lightning on chest */}
+      <polygon points="105,75 108,82 112,82 106,92" fill="#0a0a0a" opacity="0.4" transform="rotate(15 108 83)"/>
+      {/* Arms pumping */}
+      <rect x="125" y="60" width="8" height="30" rx="3" fill="#c9a84c" transform="rotate(40 129 75)"/>
+      <rect x="70" y="75" width="8" height="30" rx="3" fill="#c9a84c" transform="rotate(-20 74 90)"/>
+      {/* Legs in sprint */}
+      <rect x="75" y="118" width="12" height="38" rx="4" fill="#c9a84c" transform="rotate(-25 81 137)"/>
+      <rect x="108" y="118" width="12" height="38" rx="4" fill="#c9a84c" transform="rotate(20 114 137)"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE SWIFT</text>
+    </svg>
+  )
+}
+
+// THE ORACLE — meditative, wisdom energy
+function Oracle() {
+  return (
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="100" fill="#0d1a0d"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Wisdom energy rings */}
+      <circle cx="100" cy="85" r="40" fill="none" stroke="#c9a84c" strokeWidth="0.8" opacity="0.15"/>
+      <circle cx="100" cy="85" r="52" fill="none" stroke="#c9a84c" strokeWidth="0.6" opacity="0.1"/>
+      <circle cx="100" cy="85" r="64" fill="none" stroke="#c9a84c" strokeWidth="0.5" opacity="0.08"/>
+      {/* Head with third eye */}
+      <circle cx="100" cy="48" r="17" fill="#c9a84c"/>
+      <line x1="88" y1="45" x2="112" y2="45" stroke="#0d1a0d" strokeWidth="4" strokeLinecap="round"/>
+      <circle cx="100" cy="38" r="3" fill="#0d3d24" stroke="#c9a84c" strokeWidth="0.8"/>
+      {/* Seated body */}
+      <path d="M82 65 L78 110 L122 110 L118 65Z" fill="#c9a84c"/>
+      {/* Racket held vertical */}
+      <rect x="97" y="22" width="6" height="45" rx="2" fill="#c9a84c"/>
+      <ellipse cx="100" cy="15" rx="8" ry="10" fill="none" stroke="#c9a84c" strokeWidth="1.8"/>
+      {/* Crossed legs */}
+      <path d="M78 108 Q72 130 65 135 L80 140 Q85 130 86 115Z" fill="#c9a84c"/>
+      <path d="M122 108 Q128 130 135 135 L120 140 Q115 130 114 115Z" fill="#c9a84c"/>
+      {/* Hands on knees */}
+      <circle cx="72" cy="115" r="6" fill="#c9a84c"/>
+      <circle cx="128" cy="115" r="6" fill="#c9a84c"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE ORACLE</text>
+    </svg>
+  )
+}
+
+// THE ROOKIE — young eager, fists pumped, star badge
 function Rookie() {
   return (
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="100" fill="#1a1a1a"/>
-      <circle cx="100" cy="68" r="14" fill="#c9a84c"/>
-      <path d="M100 83 C84 83 78 96 78 112 L78 140 L122 140 L122 112 C122 96 116 83 100 83Z" fill="#fff" opacity="0.9"/>
-      <line x1="122" y1="95" x2="142" y2="82" stroke="#c9a84c" strokeWidth="3.5" strokeLinecap="round"/>
-      <ellipse cx="148" cy="78" rx="10" ry="6" fill="none" stroke="#c9a84c" strokeWidth="1.5"/>
-      <path d="M85 140 L83 178 L95 178 L94 140Z" fill="#fff" opacity="0.8"/>
-      <path d="M106 140 L106 178 L118 178 L116 140Z" fill="#fff" opacity="0.8"/>
-      <circle cx="75" cy="62" r="3" fill="#c9a84c" opacity="0.4"/>
-      <circle cx="68" cy="55" r="2" fill="#c9a84c" opacity="0.3"/>
-      <circle cx="130" cy="58" r="2.5" fill="#c9a84c" opacity="0.35"/>
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Sparkles around */}
+      <circle cx="45" cy="40" r="2" fill="#c9a84c" opacity="0.5"/>
+      <circle cx="155" cy="35" r="2.5" fill="#c9a84c" opacity="0.4"/>
+      <circle cx="35" cy="70" r="1.5" fill="#c9a84c" opacity="0.3"/>
+      <circle cx="165" cy="65" r="2" fill="#c9a84c" opacity="0.4"/>
+      {/* Head */}
+      <circle cx="100" cy="50" r="17" fill="#c9a84c"/>
+      <rect x="88" y="43" width="24" height="5" rx="2.5" fill="#0a0a0a" opacity="0.5"/>
+      {/* Open mouth grin */}
+      <path d="M93 55 Q100 62 107 55" fill="none" stroke="#0a0a0a" strokeWidth="2" opacity="0.5"/>
+      {/* Body */}
+      <rect x="82" y="67" width="36" height="48" rx="4" fill="#c9a84c"/>
+      {/* Star badge */}
+      <polygon points="100,74 102,80 108,80 103,84 105,90 100,86 95,90 97,84 92,80 98,80" fill="white" opacity="0.8"/>
+      {/* Fists pumped up */}
+      <rect x="62" y="50" width="10" height="30" rx="4" fill="#c9a84c" transform="rotate(-30 67 65)"/>
+      <circle cx="55" cy="42" r="7" fill="#c9a84c"/>
+      <rect x="128" y="50" width="10" height="30" rx="4" fill="#c9a84c" transform="rotate(30 133 65)"/>
+      <circle cx="145" cy="42" r="7" fill="#c9a84c"/>
+      {/* Legs */}
+      <rect x="84" y="113" width="13" height="40" rx="4" fill="#c9a84c"/>
+      <rect x="103" y="113" width="13" height="40" rx="4" fill="#c9a84c"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE ROOKIE</text>
+    </svg>
+  )
+}
+
+// THE VETERAN — noble stance, stars on shoulder
+function Veteran() {
+  return (
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Head */}
+      <circle cx="100" cy="45" r="18" fill="#c9a84c"/>
+      <rect x="86" y="38" width="28" height="6" rx="3" fill="#0a0a0a" opacity="0.6"/>
+      {/* Distinguished lines */}
+      <line x1="86" y1="32" x2="92" y2="30" stroke="white" strokeWidth="1" opacity="0.3"/>
+      <line x1="108" y1="32" x2="114" y2="30" stroke="white" strokeWidth="1" opacity="0.3"/>
+      {/* Body — upright noble */}
+      <rect x="80" y="63" width="40" height="55" rx="4" fill="#c9a84c"/>
+      {/* Shoulder stars */}
+      <polygon points="78,68 80,72 84,72 81,75 82,79 78,76 74,79 75,75 72,72 76,72" fill="white" opacity="0.7"/>
+      <polygon points="122,68 124,72 128,72 125,75 126,79 122,76 118,79 119,75 116,72 120,72" fill="white" opacity="0.7"/>
+      {/* Medal on chest */}
+      <circle cx="100" cy="82" r="6" fill="#0d3d24" stroke="#c9a84c" strokeWidth="1"/>
+      <rect x="97" y="72" width="6" height="6" fill="#c9a84c" opacity="0.6"/>
+      {/* Salute arm */}
+      <rect x="120" y="55" width="10" height="35" rx="4" fill="#c9a84c" transform="rotate(10 125 72)"/>
+      <rect x="128" y="42" width="8" height="20" rx="3" fill="#c9a84c" transform="rotate(-5 132 52)"/>
+      {/* Other arm at side */}
+      <rect x="68" y="70" width="10" height="35" rx="4" fill="#c9a84c" transform="rotate(-5 73 87)"/>
+      {/* Legs */}
+      <rect x="83" y="116" width="14" height="42" rx="5" fill="#c9a84c"/>
+      <rect x="103" y="116" width="14" height="42" rx="5" fill="#c9a84c"/>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE VETERAN</text>
+    </svg>
+  )
+}
+
+// THE CHAMPION — on podium, trophy, crown, confetti
+function Champion() {
+  return (
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c9a84c" strokeWidth="2" opacity="0.6"/>
+      {/* Confetti */}
+      <rect x="30" y="25" width="4" height="8" rx="1" fill="#c9a84c" opacity="0.5" transform="rotate(30 32 29)"/>
+      <rect x="160" y="30" width="4" height="8" rx="1" fill="#0d3d24" opacity="0.6" transform="rotate(-20 162 34)"/>
+      <rect x="50" y="15" width="3" height="7" rx="1" fill="white" opacity="0.3" transform="rotate(45 51 18)"/>
+      <rect x="145" y="18" width="3" height="7" rx="1" fill="#c9a84c" opacity="0.4" transform="rotate(-35 146 21)"/>
+      <rect x="40" y="40" width="3" height="6" rx="1" fill="#c9a84c" opacity="0.3" transform="rotate(60 41 43)"/>
+      <rect x="158" y="48" width="3" height="6" rx="1" fill="white" opacity="0.3" transform="rotate(-50 159 51)"/>
+      {/* Crown */}
+      <path d="M90 18 L95 28 L100 22 L105 28 L110 18 L108 30 L92 30Z" fill="#c9a84c"/>
+      {/* Head */}
+      <circle cx="100" cy="42" r="16" fill="#c9a84c"/>
+      <rect x="88" y="36" width="24" height="5" rx="2.5" fill="#0a0a0a" opacity="0.5"/>
+      {/* Body */}
+      <rect x="82" y="58" width="36" height="42" rx="4" fill="#c9a84c"/>
+      {/* Trophy in left hand */}
+      <rect x="55" y="50" width="10" height="30" rx="4" fill="#c9a84c" transform="rotate(-25 60 65)"/>
+      <path d="M40 35 L40 52 Q40 58 48 58 L48 62 L44 62 L44 65 L56 65 L56 62 L52 62 L52 58 Q60 58 60 52 L60 35Z" fill="#c9a84c"/>
+      {/* Racket in right hand raised */}
+      <rect x="120" y="40" width="10" height="35" rx="4" fill="#c9a84c" transform="rotate(20 125 57)"/>
+      <ellipse cx="140" cy="28" rx="10" ry="13" fill="none" stroke="#c9a84c" strokeWidth="2" transform="rotate(20 140 28)"/>
+      {/* Podium */}
+      <rect x="70" y="100" width="60" height="55" rx="4" fill="#0d3d24"/>
+      <text x="100" y="122" textAnchor="middle" fill="#c9a84c" fontSize="18" fontWeight="700" fontFamily="serif">1</text>
+      <text x="100" y="185" textAnchor="middle" fill="#c9a84c" fontSize="8" fontFamily="sans-serif" fontWeight="600" letterSpacing="1.5" opacity="0.7">THE CHAMPION</text>
     </svg>
   )
 }
 
 export const AVATARS = [
-  { id: 1, name: 'Smasher', Component: Smasher },
-  { id: 2, name: 'Defender', Component: Defender },
-  { id: 3, name: 'Net Player', Component: NetPlayer },
-  { id: 4, name: 'Serve', Component: Serve },
-  { id: 5, name: 'Backhand', Component: Backhand },
-  { id: 6, name: 'Shuttle', Component: Shuttle },
-  { id: 7, name: 'Racket', Component: Racket },
-  { id: 8, name: 'Trophy', Component: Trophy },
-  { id: 9, name: 'Jump', Component: Jump },
-  { id: 10, name: 'Coach', Component: Coach },
-  { id: 11, name: 'Veteran', Component: Veteran },
-  { id: 12, name: 'Rookie', Component: Rookie },
+  { id: 1, name: 'The Smasher', Component: Smasher },
+  { id: 2, name: 'The Guardian', Component: Guardian },
+  { id: 3, name: 'The Phantom', Component: Phantom },
+  { id: 4, name: 'The Ace', Component: Ace },
+  { id: 5, name: 'The Blade', Component: Blade },
+  { id: 6, name: 'The Falcon', Component: Falcon },
+  { id: 7, name: 'The Titan', Component: Titan },
+  { id: 8, name: 'The Swift', Component: Swift },
+  { id: 9, name: 'The Oracle', Component: Oracle },
+  { id: 10, name: 'The Rookie', Component: Rookie },
+  { id: 11, name: 'The Veteran', Component: Veteran },
+  { id: 12, name: 'The Champion', Component: Champion },
 ]
