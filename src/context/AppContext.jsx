@@ -3,9 +3,11 @@ import { supabase } from '../lib/supabase'
 
 const Ctx = createContext()
 
+const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '1234'
+
 export function AppProvider({ children }) {
   const [theme, setTheme] = useState(() => localStorage.getItem('ebs_theme') || 'dark')
-  const [isAdmin, setIsAdmin] = useState(() => sessionStorage.getItem('ebs_admin') === import.meta.env.VITE_ADMIN_PIN)
+  const [isAdmin, setIsAdmin] = useState(() => sessionStorage.getItem('ebs_admin') === ADMIN_PIN)
   const [players, setPlayers] = useState([])
   const [activeSession, setActiveSession] = useState(null)
 
@@ -42,7 +44,7 @@ export function AppProvider({ children }) {
   }
 
   function loginAdmin(pin) {
-    if (pin === import.meta.env.VITE_ADMIN_PIN) {
+    if (pin === ADMIN_PIN) {
       sessionStorage.setItem('ebs_admin', pin)
       setIsAdmin(true)
       return true

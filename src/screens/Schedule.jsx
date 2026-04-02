@@ -282,7 +282,14 @@ export default function Schedule() {
       <Header />
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', fontWeight: 300, marginBottom: '20px' }}>Schedule</div>
 
-      {swapMsg && <div style={{ background: 'var(--green-dim)', color: 'var(--green)', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: 500, textAlign: 'center', marginBottom: '12px' }}>{swapMsg}</div>}
+      {swapMsg && (
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ background: 'var(--green-dim)', color: 'var(--green)', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: 500, textAlign: 'center', marginBottom: '8px' }}>{swapMsg}</div>
+          <button onClick={handleRegenerate} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'var(--gold-dim)', border: '1px solid var(--gold-border)', color: 'var(--gold)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+            {'\u267B\uFE0F'} Recalculate Schedule
+          </button>
+        </div>
+      )}
 
       {currentGame && <GameCard game={currentGame} isCurrent={true} />}
 
@@ -313,7 +320,10 @@ export default function Schedule() {
 
       {upcomingPending.length > 0 && (
         <>
-          <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', margin: '20px 0 10px', fontWeight: 600 }}>Upcoming</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0 10px' }}>
+            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', fontWeight: 600 }}>Upcoming</span>
+            {isAdmin && <button onClick={handleRegenerate} style={{ padding: '5px 12px', borderRadius: '8px', background: 'var(--gold-dim)', border: '1px solid var(--gold-border)', color: 'var(--gold)', fontSize: '10px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u267B\uFE0F'} Recalculate</button>}
+          </div>
           {upcomingPending.map(g => <GameCard key={g.id} game={g} isCurrent={false} />)}
         </>
       )}

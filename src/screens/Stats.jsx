@@ -22,6 +22,8 @@ export default function Stats() {
   const { players } = useApp()
   const [tab, setTab] = useState('today')
   const [lastSession, setLastSession] = useState(null)
+  const [potdPlayer, setPotdPlayer] = useState(null)
+  const [potdSp, setPotdSp] = useState(null)
   const [sessionBadges, setSessionBadges] = useState([])
   const [allBadges, setAllBadges] = useState([])
 
@@ -39,6 +41,13 @@ export default function Stats() {
       .maybeSingle()
     setLastSession(sess)
 
+    if (sess?.player_of_day) {
+      const { data: p } = await supabase.from('players').select('*').eq('id', sess.player_of_day).single()
+      setPotdPlayer(p)
+      const sp = sess?.session_players?.find(s => s.player_id === sess.player_of_day)
+      setPotdSp(sp)
+    }
+
     const { data: ab } = await supabase.from('badges').select('*, players(name, initials)').order('earned_at', { ascending: false })
     setAllBadges(ab || [])
 
@@ -48,22 +57,42 @@ export default function Stats() {
     }
   }
 
-  // Leaderboard: filter 0-game players, sort by win% desc, then wins, then games
+  // Ranking: filter 0-game, sort by win% desc, total_wins desc, total_games desc
   const ranked = [...players]
     .filter(p => p.total_games > 0)
     .sort((a, b) => {
-      const wpA = a.total_wins / a.total_games
-      const wpB = b.total_wins / b.total_games
+      const wpA = Math.round((a.total_wins / a.total_games) * 100)
+      const wpB = Math.round((b.total_wins / b.total_games) * 100)
       if (wpB !== wpA) return wpB - wpA
       if (b.total_wins !== a.total_wins) return b.total_wins - a.total_wins
       return b.total_games - a.total_games
     })
 
-  // POTD from most recent completed session
-  const potd = lastSession?.player_of_day ? players.find(p => p.id === lastSession.player_of_day) : null
-  const potdSp = lastSession?.session_players?.find(sp => sp.player_id === lastSession?.player_of_day)
-
   const tabLabels = { today: 'Latest Session', month: 'Monthly', quarter: 'All Time' }
+
+  function PodiumSlot({ player, rank, height, medal, borderColor }) {
+    if (!player) return null
+    const wp = Math.round((player.total_wins / player.total_games) * 100)
+    return (
+      <div style={{ textAlign: 'center', flex: 1 }}>
+        <div style={{ fontSize: '22px', marginBottom: '4px' }}>{medal}</div>
+        <Avatar initials={player.initials} size={rank === 0 ? 44 : 34} index={players.indexOf(player)} avatarId={player.avatar_id} style={{ margin: '0 auto 6px' }} />
+        <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '2px' }}>{player.name}</div>
+        <div style={{ fontSize: '9px', color: 'var(--muted)', marginBottom: '6px' }}>
+          {player.total_wins}W {'\u00B7'} {player.total_losses}L
+        </div>
+        <div style={{
+          height, borderRadius: '8px 8px 0 0',
+          background: `${borderColor}18`,
+          borderTop: `3px solid ${borderColor}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '18px', fontWeight: 800, color: borderColor
+        }}>
+          {rank + 1}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="screen" style={{ padding: '20px 16px 90px' }}>
@@ -88,19 +117,19 @@ export default function Stats() {
       {tab === 'today' && (
         <div style={{ background: 'linear-gradient(135deg, var(--gold-dim), var(--surface))', borderRadius: '16px', border: '1px solid var(--gold-border)', padding: '24px', textAlign: 'center', marginBottom: '20px' }}>
           <div style={{ fontSize: '40px', marginBottom: '8px' }}>{'\u{1F451}'}</div>
-          {potd ? (
+          {potdPlayer ? (
             <>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Player of the Day</div>
-              <Avatar initials={potd.initials} size={56} index={players.indexOf(potd)} avatarId={potd.avatar_id} style={{ margin: '0 auto 10px' }} />
-              <div style={{ fontSize: '20px', fontWeight: 600, marginBottom: '4px' }}>{potd.name}</div>
+              <Avatar initials={potdPlayer.initials} size={56} index={players.indexOf(potdPlayer)} avatarId={potdPlayer.avatar_id} style={{ margin: '0 auto 10px' }} />
+              <div style={{ fontSize: '20px', fontWeight: 600, marginBottom: '4px' }}>{potdPlayer.name}</div>
               {potdSp && (
                 <div style={{ fontSize: '13px', color: 'var(--muted)' }}>
                   {potdSp.games_won}W {potdSp.games_played - potdSp.games_won}L {'\u00B7'} {(potdSp.points_scored - potdSp.points_conceded) >= 0 ? '+' : ''}{potdSp.points_scored - potdSp.points_conceded} pts
                 </div>
               )}
-              {sessionBadges.filter(b => b.player_id === potd.id).length > 0 && (
+              {sessionBadges.filter(b => b.player_id === potdPlayer.id).length > 0 && (
                 <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
-                  {sessionBadges.filter(b => b.player_id === potd.id).map((b, i) => (
+                  {sessionBadges.filter(b => b.player_id === potdPlayer.id).map((b, i) => (
                     <span key={i} style={{ fontSize: '12px', background: 'var(--surface)', padding: '3px 8px', borderRadius: '6px' }}>
                       {BADGE_DEFS[b.badge_type]?.icon} {BADGE_DEFS[b.badge_type]?.label}
                     </span>
@@ -111,7 +140,7 @@ export default function Stats() {
           ) : (
             <>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '18px', fontWeight: 300, marginBottom: '4px' }}>No completed sessions yet</div>
-              <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Complete a session to crown POTD</div>
+              <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Complete a session to crown Player of the Day</div>
             </>
           )}
         </div>
@@ -123,36 +152,23 @@ export default function Stats() {
 
         {ranked.length === 0 && <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)', fontSize: '13px' }}>No games played yet</div>}
 
-        {/* Podium: #2 left, #1 center tallest, #3 right */}
+        {/* Podium: #2 left, #1 center (tallest), #3 right */}
         {ranked.length >= 3 && (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '8px', marginBottom: '20px' }}>
-            {/* #2 left */}
-            <div style={{ textAlign: 'center', flex: 1 }}>
-              <Avatar initials={ranked[1].initials} size={32} index={players.indexOf(ranked[1])} avatarId={ranked[1].avatar_id} style={{ margin: '0 auto 6px' }} />
-              <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{ranked[1].name}</div>
-              <div style={{ height: 70, borderRadius: '8px 8px 0 0', background: 'rgba(192,192,192,0.13)', borderTop: '3px solid #c0c0c0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '20px' }}>{'\u{1F948}'}</span>
-                <span style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>{ranked[1].total_wins}W</span>
-              </div>
-            </div>
-            {/* #1 center */}
-            <div style={{ textAlign: 'center', flex: 1 }}>
-              <Avatar initials={ranked[0].initials} size={40} index={players.indexOf(ranked[0])} avatarId={ranked[0].avatar_id} style={{ margin: '0 auto 6px' }} />
-              <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{ranked[0].name}</div>
-              <div style={{ height: 100, borderRadius: '8px 8px 0 0', background: 'var(--gold-dim)', borderTop: '3px solid var(--gold)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '20px' }}>{'\u{1F451}'}</span>
-                <span style={{ fontSize: '10px', color: 'var(--gold)', marginTop: '2px', fontWeight: 700 }}>{ranked[0].total_wins}W</span>
-              </div>
-            </div>
-            {/* #3 right */}
-            <div style={{ textAlign: 'center', flex: 1 }}>
-              <Avatar initials={ranked[2].initials} size={32} index={players.indexOf(ranked[2])} avatarId={ranked[2].avatar_id} style={{ margin: '0 auto 6px' }} />
-              <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{ranked[2].name}</div>
-              <div style={{ height: 50, borderRadius: '8px 8px 0 0', background: 'rgba(205,127,50,0.13)', borderTop: '3px solid #cd7f32', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '20px' }}>{'\u{1F949}'}</span>
-                <span style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>{ranked[2].total_wins}W</span>
-              </div>
-            </div>
+            <PodiumSlot player={ranked[1]} rank={1} height={75} medal={'\u{1F948}'} borderColor="#c0c0c0" />
+            <PodiumSlot player={ranked[0]} rank={0} height={110} medal={'\u{1F451}'} borderColor="var(--gold)" />
+            <PodiumSlot player={ranked[2]} rank={2} height={55} medal={'\u{1F949}'} borderColor="#cd7f32" />
+          </div>
+        )}
+        {ranked.length === 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <PodiumSlot player={ranked[0]} rank={0} height={110} medal={'\u{1F451}'} borderColor="var(--gold)" />
+          </div>
+        )}
+        {ranked.length === 2 && (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '12px', marginBottom: '20px' }}>
+            <PodiumSlot player={ranked[1]} rank={1} height={75} medal={'\u{1F948}'} borderColor="#c0c0c0" />
+            <PodiumSlot player={ranked[0]} rank={0} height={110} medal={'\u{1F451}'} borderColor="var(--gold)" />
           </div>
         )}
 
@@ -169,7 +185,7 @@ export default function Stats() {
                 <div style={{ fontSize: '10px', color: t.color, fontWeight: 600 }}>{t.label}</div>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--muted)', textAlign: 'right', minWidth: '55px' }}>
-                {p.total_wins}W {p.total_losses}L
+                {p.total_wins}W {'\u00B7'} {p.total_losses}L
               </div>
               <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text)', textAlign: 'right', minWidth: '36px' }}>
                 {wp}%

@@ -28,19 +28,19 @@ export default function Header({ title, showBack }) {
         <div>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: showBack ? '20px' : '13px',
-            fontWeight: 600,
-            letterSpacing: showBack ? '0.02em' : '0.18em',
+            fontSize: showBack ? '20px' : '22px',
+            fontWeight: 700,
+            letterSpacing: showBack ? '0.02em' : '0.15em',
             textTransform: showBack ? 'none' : 'uppercase',
             color: 'var(--gold)', lineHeight: 1
           }}>
-            {showBack ? title : 'Elite Badminton Social'}
+            {showBack ? title : 'EBS'}
           </div>
           {!showBack && (
             <div style={{
-              fontSize: '9px', letterSpacing: '0.15em',
-              textTransform: 'uppercase', color: 'var(--muted)', marginTop: '2px'
-            }}>Est. 2025 {'\u00B7'} Private Group</div>
+              fontSize: '8px', letterSpacing: '0.12em',
+              textTransform: 'uppercase', color: 'var(--muted)', marginTop: '3px'
+            }}>Elite Badminton Social {'\u00B7'} Private Group</div>
           )}
         </div>
       </div>
