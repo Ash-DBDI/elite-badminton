@@ -179,36 +179,56 @@ export default function Schedule() {
     setEditingGame(null); await loadActiveSession()
   }
 
+  const [recalculating, setRecalculating] = useState(false)
+
   async function handleRegenerate() {
-    // Fetch fresh checked-in players from DB (not stale cache)
-    const { data: freshSp } = await supabase
-      .from('session_players').select('*, players(*)').eq('session_id', activeSession.id).eq('checked_in', true)
-    const freshPlayers = (freshSp || []).map(s => s.players).filter(Boolean)
-    if (freshPlayers.length < 4) return alert('Need at least 4 checked-in players')
+    setRecalculating(true)
+    try {
+      // 1. Fresh checked-in players from DB
+      const { data: spData, error: spErr } = await supabase
+        .from('session_players').select('*, players(*)').eq('session_id', activeSession.id).eq('checked_in', true)
+      if (spErr || !spData || spData.length < 4) { alert('Need at least 4 checked-in players'); setRecalculating(false); return }
 
-    // Calculate session_games from completed games for each player
-    const completedForReshuffle = allGames.filter(g => g.status === 'completed')
-    const ap = freshPlayers.map(p => {
-      const myGames = completedForReshuffle.filter(g =>
-        [g.team_a_player1, g.team_a_player2, g.team_b_player1, g.team_b_player2].includes(p.id)
-      )
-      return { ...p, session_games: myGames.length }
-    })
+      // 2. All completed games for this session
+      const { data: doneGames } = await supabase
+        .from('games').select('*').eq('session_id', activeSession.id).eq('status', 'completed').order('game_number', { ascending: true })
+      const done = doneGames || []
 
-    const pg = allGames.filter(g => g.status === 'pending').sort((a2, b2) => a2.game_number - b2.game_number)
-    const nextNum = pg.length > 0 ? pg[0].game_number : (completedForReshuffle.length > 0 ? Math.max(...completedForReshuffle.map(g => g.game_number)) + 1 : 1)
-    const count = pg.length > 0 ? pg.length : Math.max(1, Math.floor((activeSession.duration_minutes || 120) / 12) - completedForReshuffle.length)
+      // 3. Delete ALL pending games
+      await supabase.from('games').delete().eq('session_id', activeSession.id).eq('status', 'pending')
 
-    await supabase.from('games').delete().eq('session_id', activeSession.id).eq('status', 'pending')
-    const rs = reshuffleRemaining(ap, completedForReshuffle, count, nextNum)
-    if (rs.length > 0) await supabase.from('games').insert(rs.map((g, i) => ({
-      session_id: activeSession.id, game_number: g.game_number,
-      status: i === 0 && !allGames.find(gg => gg.status === 'active') ? 'active' : 'pending',
-      team_a_player1: g.team_a_player1, team_a_player2: g.team_a_player2,
-      team_b_player1: g.team_b_player1, team_b_player2: g.team_b_player2,
-      sitting_out: g.sitting_out, balance_score: g.balance_score
-    })))
-    await loadActiveSession()
+      // 4. Also delete current active game and re-create it
+      await supabase.from('games').delete().eq('session_id', activeSession.id).eq('status', 'active')
+
+      // 5. Build stats from completed games
+      const activePlayers = spData.map(sp => {
+        const p = sp.players
+        const myGames = done.filter(g => [g.team_a_player1, g.team_a_player2, g.team_b_player1, g.team_b_player2].includes(p.id))
+        const myWins = myGames.filter(g => { const inA = [g.team_a_player1, g.team_a_player2].includes(p.id); return inA ? g.team_a_score > g.team_b_score : g.team_b_score > g.team_a_score })
+        return { ...p, session_games: myGames.length, session_wins: myWins.length }
+      })
+
+      // 6. Calculate how many games to generate
+      const remainingMins = (activeSession.duration_minutes || 120) - (done.length * 12)
+      const pendingCount = Math.max(3, Math.floor(remainingMins / 12))
+      const nextNum = done.length + 1
+
+      // 7. Generate
+      const newGames = reshuffleRemaining(activePlayers, done, pendingCount, nextNum)
+      if (newGames.length > 0) {
+        await supabase.from('games').insert(newGames.map((g, i) => ({
+          session_id: activeSession.id, game_number: g.game_number,
+          status: i === 0 ? 'active' : 'pending',
+          team_a_player1: g.team_a_player1, team_a_player2: g.team_a_player2,
+          team_b_player1: g.team_b_player1, team_b_player2: g.team_b_player2,
+          sitting_out: g.sitting_out, balance_score: g.balance_score
+        })))
+      }
+
+      setScoreA(0); setScoreB(0)
+      await loadActiveSession()
+    } catch (err) { console.error('Recalculate error:', err); alert('Error: ' + err.message) }
+    finally { setRecalculating(false) }
   }
 
   // SWAP
@@ -286,12 +306,26 @@ export default function Schedule() {
 
         {/* Score input */}
         {isActive && isCurrent && (
-          <div style={{ marginTop: '16px' }}>
-            <ScoreControl label={P(game.team_a_player1).name + ' & ' + P(game.team_a_player2).name} value={scoreA} onChange={setScoreA} />
-            <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: 800, color: 'var(--muted)', margin: '8px 0' }}>VS</div>
-            <ScoreControl label={P(game.team_b_player1).name + ' & ' + P(game.team_b_player2).name} value={scoreB} onChange={setScoreB} />
-            {scoreError && <div style={{ background: 'var(--red-dim)', color: 'var(--red)', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: 500, textAlign: 'center', margin: '12px 0' }}>{scoreError}</div>}
-            <button onClick={handleSubmitScore} disabled={submitting} style={{ width: '100%', padding: '16px', minHeight: '56px', borderRadius: '12px', marginTop: '12px', background: submitting ? 'var(--surface2)' : 'var(--gold)', border: 'none', color: '#111', fontWeight: 700, fontSize: '16px', cursor: submitting ? 'wait' : 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{submitting ? 'Submitting...' : 'Submit Score'}</button>
+          <div style={{ marginTop: '16px', padding: '0 16px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', textAlign: 'center', marginBottom: '8px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              {P(game.team_a_player1).name} & {P(game.team_a_player2).name}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '12px' }}>
+              <button onClick={() => setScoreA(v => Math.max(0, v - 1))} style={{ width: '56px', height: '56px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--surface2)', color: 'var(--text)', fontSize: '24px', fontWeight: 300, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{'\u2212'}</button>
+              <input type="number" min="0" max="30" value={scoreA} onChange={e => { const val = parseInt(e.target.value); if (!isNaN(val)) setScoreA(Math.min(30, Math.max(0, val))); else setScoreA(0) }} style={{ width: '90px', height: '72px', textAlign: 'center', fontSize: '42px', fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", background: 'var(--surface2)', color: 'var(--text)', border: '2px solid var(--gold-border)', borderRadius: '14px', outline: 'none', WebkitAppearance: 'none', MozAppearance: 'textfield' }} />
+              <button onClick={() => setScoreA(v => Math.min(30, v + 1))} style={{ width: '56px', height: '56px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--surface2)', color: 'var(--gold)', fontSize: '24px', fontWeight: 300, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+            </div>
+            <div style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '13px', marginBottom: '12px' }}>vs</div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', textAlign: 'center', marginBottom: '8px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              {P(game.team_b_player1).name} & {P(game.team_b_player2).name}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '16px' }}>
+              <button onClick={() => setScoreB(v => Math.max(0, v - 1))} style={{ width: '56px', height: '56px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--surface2)', color: 'var(--text)', fontSize: '24px', fontWeight: 300, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{'\u2212'}</button>
+              <input type="number" min="0" max="30" value={scoreB} onChange={e => { const val = parseInt(e.target.value); if (!isNaN(val)) setScoreB(Math.min(30, Math.max(0, val))); else setScoreB(0) }} style={{ width: '90px', height: '72px', textAlign: 'center', fontSize: '42px', fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", background: 'var(--surface2)', color: 'var(--text)', border: '2px solid var(--gold-border)', borderRadius: '14px', outline: 'none', WebkitAppearance: 'none', MozAppearance: 'textfield' }} />
+              <button onClick={() => setScoreB(v => Math.min(30, v + 1))} style={{ width: '56px', height: '56px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--surface2)', color: 'var(--gold)', fontSize: '24px', fontWeight: 300, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+            </div>
+            {scoreError && <div style={{ color: 'var(--red)', fontSize: '12px', textAlign: 'center', marginBottom: '12px' }}>{scoreError}</div>}
+            <button onClick={handleSubmitScore} disabled={submitting} style={{ width: '100%', padding: '18px', borderRadius: '12px', background: submitting ? 'var(--surface2)' : 'linear-gradient(135deg, #c9a84c, #e8c96a)', border: 'none', color: '#111', fontSize: '15px', fontWeight: 700, cursor: submitting ? 'wait' : 'pointer', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{submitting ? 'Submitting...' : 'Submit Score'}</button>
           </div>
         )}
       </div>
@@ -309,7 +343,7 @@ export default function Schedule() {
         <div style={{ marginBottom: '12px' }}>
           <div style={{ background: 'var(--green-dim)', color: 'var(--green)', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: 500, textAlign: 'center', marginBottom: '8px' }}>{swapMsg}</div>
           <button onClick={handleRegenerate} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'var(--gold-dim)', border: '1px solid var(--gold-border)', color: 'var(--gold)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-            {'\u267B\uFE0F'} Recalculate Schedule
+            {recalculating ? 'Calculating...' : '\u267B\uFE0F Recalculate'} Schedule
           </button>
         </div>
       )}
@@ -345,7 +379,7 @@ export default function Schedule() {
         <>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0 10px' }}>
             <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', fontWeight: 600 }}>Upcoming</span>
-            {isAdmin && <button onClick={handleRegenerate} style={{ padding: '5px 12px', borderRadius: '8px', background: 'var(--gold-dim)', border: '1px solid var(--gold-border)', color: 'var(--gold)', fontSize: '10px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u267B\uFE0F'} Recalculate</button>}
+            {isAdmin && <button onClick={handleRegenerate} style={{ padding: '5px 12px', borderRadius: '8px', background: 'var(--gold-dim)', border: '1px solid var(--gold-border)', color: 'var(--gold)', fontSize: '10px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{recalculating ? 'Calculating...' : '\u267B\uFE0F Recalculate'}</button>}
           </div>
           {upcomingPending.map(g => <GameCard key={g.id} game={g} isCurrent={false} />)}
         </>
