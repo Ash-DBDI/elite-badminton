@@ -180,13 +180,34 @@ export default function Schedule() {
   }
 
   async function handleRegenerate() {
-    const ap = spList.filter(s => s.checked_in).map(s => s.players).filter(Boolean)
-    if (ap.length < 4) return alert('Need at least 4 checked-in players')
+    // Fetch fresh checked-in players from DB (not stale cache)
+    const { data: freshSp } = await supabase
+      .from('session_players').select('*, players(*)').eq('session_id', activeSession.id).eq('checked_in', true)
+    const freshPlayers = (freshSp || []).map(s => s.players).filter(Boolean)
+    if (freshPlayers.length < 4) return alert('Need at least 4 checked-in players')
+
+    // Calculate session_games from completed games for each player
+    const completedForReshuffle = allGames.filter(g => g.status === 'completed')
+    const ap = freshPlayers.map(p => {
+      const myGames = completedForReshuffle.filter(g =>
+        [g.team_a_player1, g.team_a_player2, g.team_b_player1, g.team_b_player2].includes(p.id)
+      )
+      return { ...p, session_games: myGames.length }
+    })
+
     const pg = allGames.filter(g => g.status === 'pending').sort((a2, b2) => a2.game_number - b2.game_number)
-    if (pg.length === 0) return
+    const nextNum = pg.length > 0 ? pg[0].game_number : (completedForReshuffle.length > 0 ? Math.max(...completedForReshuffle.map(g => g.game_number)) + 1 : 1)
+    const count = pg.length > 0 ? pg.length : Math.max(1, Math.floor((activeSession.duration_minutes || 120) / 12) - completedForReshuffle.length)
+
     await supabase.from('games').delete().eq('session_id', activeSession.id).eq('status', 'pending')
-    const rs = reshuffleRemaining(ap, completed, pg.length, pg[0].game_number)
-    if (rs.length > 0) await supabase.from('games').insert(rs.map(g => ({ session_id: activeSession.id, game_number: g.game_number, status: 'pending', team_a_player1: g.team_a_player1, team_a_player2: g.team_a_player2, team_b_player1: g.team_b_player1, team_b_player2: g.team_b_player2, sitting_out: g.sitting_out, balance_score: g.balance_score })))
+    const rs = reshuffleRemaining(ap, completedForReshuffle, count, nextNum)
+    if (rs.length > 0) await supabase.from('games').insert(rs.map((g, i) => ({
+      session_id: activeSession.id, game_number: g.game_number,
+      status: i === 0 && !allGames.find(gg => gg.status === 'active') ? 'active' : 'pending',
+      team_a_player1: g.team_a_player1, team_a_player2: g.team_a_player2,
+      team_b_player1: g.team_b_player1, team_b_player2: g.team_b_player2,
+      sitting_out: g.sitting_out, balance_score: g.balance_score
+    })))
     await loadActiveSession()
   }
 
