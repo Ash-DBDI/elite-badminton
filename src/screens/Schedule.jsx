@@ -16,21 +16,22 @@ const pmBtn = {
 }
 
 function ScoreControl({ label, value, onChange }) {
-  const num = parseInt(value) || 0
-  function handleType(e) {
-    const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 2)
-    const n = parseInt(val)
-    if (val === '') { onChange(''); return }
-    onChange(String(Math.min(30, n)))
-  }
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-        <button onClick={() => onChange(String(Math.max(0, num - 1)))} style={{ ...pmBtn, background: 'var(--surface2)', color: 'var(--text)' }}>{'\u2212'}</button>
-        <input type="text" inputMode="numeric" pattern="[0-9]*" className="score-input"
-          value={value} onChange={handleType} />
-        <button onClick={() => onChange(String(Math.min(30, num + 1)))} style={{ ...pmBtn, background: 'var(--gold-dim)', color: 'var(--gold)', border: '1px solid var(--gold-border)' }}>{'\uFF0B'}</button>
+        <button onClick={() => onChange(Math.max(0, value - 1))} style={{ ...pmBtn, background: 'var(--surface2)', color: 'var(--text)' }}>{'\u2212'}</button>
+        <input
+          type="text" inputMode="numeric" pattern="[0-9]*"
+          value={value === 0 ? '' : String(value)}
+          placeholder="0" maxLength={2} className="score-input"
+          onChange={e => {
+            const raw = e.target.value.replace(/[^0-9]/g, '').slice(0, 2)
+            onChange(raw === '' ? 0 : Math.min(30, parseInt(raw)))
+          }}
+          onFocus={e => e.target.select()}
+        />
+        <button onClick={() => onChange(Math.min(30, value + 1))} style={{ ...pmBtn, background: 'var(--gold-dim)', color: 'var(--gold)', border: '1px solid var(--gold-border)' }}>{'\uFF0B'}</button>
       </div>
     </div>
   )
@@ -38,14 +39,14 @@ function ScoreControl({ label, value, onChange }) {
 
 export default function Schedule() {
   const { activeSession, loadActiveSession, players, loadPlayers, isAdmin } = useApp()
-  const [scoreA, setScoreA] = useState('')
-  const [scoreB, setScoreB] = useState('')
+  const [scoreA, setScoreA] = useState(0)
+  const [scoreB, setScoreB] = useState(0)
   const [showCompleted, setShowCompleted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [scoreError, setScoreError] = useState('')
   const [editingGame, setEditingGame] = useState(null)
-  const [editA, setEditA] = useState('')
-  const [editB, setEditB] = useState('')
+  const [editA, setEditA] = useState(0)
+  const [editB, setEditB] = useState(0)
   const [editError, setEditError] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [showSwap, setShowSwap] = useState(false)
@@ -89,11 +90,10 @@ export default function Schedule() {
   const P = (id) => pMap[id] || { name: '?', initials: '??', _i: 0 }
 
   function validate(a, b) {
-    const na = parseInt(a), nb = parseInt(b)
-    if (a === '' || b === '' || isNaN(na) || isNaN(nb)) return 'Enter both scores'
-    if (na < 0 || nb < 0) return 'Scores cannot be negative'
-    if (na === nb) return 'Scores cannot be tied'
-    if (Math.max(na, nb) < 21) return 'Winner must have at least 21 points'
+    if (a === 0 && b === 0) return 'Enter both scores'
+    if (a < 0 || b < 0) return 'Scores cannot be negative'
+    if (a === b) return 'Scores cannot be tied'
+    if (Math.max(a, b) < 21) return 'Winner must have at least 21 points'
     return null
   }
 
@@ -102,7 +102,7 @@ export default function Schedule() {
     setScoreError('')
     const err = validate(scoreA, scoreB)
     if (err) { setScoreError(err); return }
-    const a = parseInt(scoreA), b = parseInt(scoreB)
+    const a = scoreA, b = scoreB
     setSubmitting(true)
     try {
       await supabase.from('games').update({ team_a_score: a, team_b_score: b, status: 'completed', locked: true, completed_at: new Date().toISOString() }).eq('id', currentGame.id)
@@ -140,7 +140,7 @@ export default function Schedule() {
         let st = 0; for (const g of pg) { const iA = [g.team_a_player1, g.team_a_player2].includes(pid); if (iA ? g.team_a_score > g.team_b_score : g.team_b_score > g.team_a_score) st++; else st = 0 }
         if (st >= 3) { const { data: ex } = await supabase.from('badges').select('id').eq('player_id', pid).eq('session_id', activeSession.id).eq('badge_type', 'HOT_HAND'); if (!ex?.length) await supabase.from('badges').insert({ player_id: pid, session_id: activeSession.id, badge_type: 'HOT_HAND' }) }
       }
-      setScoreA(''); setScoreB(''); setScoreError(''); await loadActiveSession(); await loadPlayers()
+      setScoreA(0); setScoreB(0); setScoreError(''); await loadActiveSession(); await loadPlayers()
     } catch (err) { console.error(err); setScoreError('Error submitting score') }
     finally { setSubmitting(false) }
   }
@@ -160,7 +160,7 @@ export default function Schedule() {
 
   async function handleEditSave(game) {
     setEditError(''); const err = validate(editA, editB); if (err) { setEditError(err); return }
-    const a = parseInt(editA), b = parseInt(editB)
+    const a = editA, b = editB
     const fourIds = [game.team_a_player1, game.team_a_player2, game.team_b_player1, game.team_b_player2]
     const oldAWon = game.team_a_score > game.team_b_score
     for (const pid of fourIds) {
@@ -243,7 +243,7 @@ export default function Schedule() {
         {isDone && !isEditing && (
           <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
             <button onClick={() => shareGameResult({ gameNumber: game.game_number, teamA: [P(game.team_a_player1).name, P(game.team_a_player2).name], teamB: [P(game.team_b_player1).name, P(game.team_b_player2).name], scoreA: game.team_a_score, scoreB: game.team_b_score, sessionDate: activeSession?.session_date || '' })} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--green-dim)', border: '1px solid var(--green-border)', color: 'var(--green)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{1F4F2}'} Share</button>
-            {isAdmin && <button onClick={() => { setEditingGame(game.id); setEditA(String(game.team_a_score)); setEditB(String(game.team_b_score)); setEditError('') }} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{270F}\u{FE0F}'} Edit</button>}
+            {isAdmin && <button onClick={() => { setEditingGame(game.id); setEditA(game.team_a_score || 0); setEditB(game.team_b_score || 0); setEditError('') }} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{270F}\u{FE0F}'} Edit</button>}
             {isAdmin && <button onClick={() => setConfirmDelete(game)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--red-dim)', border: '1px solid var(--red)', color: 'var(--red)', fontSize: '11px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{'\u{1F5D1}\u{FE0F}'} Delete</button>}
           </div>
         )}

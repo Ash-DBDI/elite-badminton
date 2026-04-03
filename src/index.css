@@ -101,24 +101,27 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-input[type=text].score-input {
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 12px;
-  border: 2px solid var(--border);
-  background: var(--surface2);
-  color: var(--text);
-  text-align: center;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 36px;
-  font-weight: 700;
+.score-input {
   width: 88px;
   height: 64px;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px;
+  font-weight: 700;
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
   outline: none;
   cursor: text;
+  -webkit-appearance: none;
+  appearance: none;
 }
-input[type=text].score-input:focus {
+.score-input:focus {
   border-color: var(--gold);
+}
+.score-input::placeholder {
+  color: var(--muted);
 }
 
 @keyframes crownFloat {
